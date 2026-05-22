@@ -4,7 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MovieClub - Stream Your Favorites</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script s<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>StreamFlix</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <h1>StreamFlix</h1>
+
+  <input 
+    type="text" 
+    id="search" 
+    placeholder="Search movies..." 
+    onkeyup="debounceSearch(this.value)"
+  >
+</header>
+
+<!-- SEARCH RESULTS -->
+<section id="searchResults"></section>
+
+<!-- ROWS -->
+<section class="row">
+  <h2>Trending</h2>
+  <div id="trending" class="movies"></div>
+</section>
+
+<section class="row">
+  <h2>Action</h2>
+  <div id="action" class="movies"></div>
+</section>
+
+<section class="row">
+  <h2>Comedy</h2>
+  <div id="comedy" class="movies"></div>
+</section>
+
+<section class="row">
+  <h2>Top Rated</h2>
+  <div id="toprated" class="movies"></div>
+</section>
+
+<!-- PLAYER -->
+<div id="player" class="player">
+  <span class="close" onclick="closePlayer()">✖</span>
+  <iframe id="videoFrame" frameborder="0" allowfullscreen></iframe>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>rc="https://cdn.tailwindcss.com"></script>
   <style>
     /* Custom hidden scrollbar style across horizontal rows */
     .scrollbar-hide::-webkit-scrollbar { display: none; }
