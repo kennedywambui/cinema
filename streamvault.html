@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1c1c28;
+    --surface: #1e1e2e;
+    --surface2: #2a2a3e;
+    --accent: #e50914;
+    --accent2: #ff6b35;
+    --gold: #f5c842;
+    --text: #f0f0f5;
+    --text2: #a0a0b8;
+    --text3: #606070;
+    --border: rgba(255,255,255,0.08);
+    --nav-h: 68px;
+    --radius: 10px;
+    --card-w: 220px;
+    --card-h: 130px;
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--nav-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.95) 0%, transparent 100%);
+    transition: background 0.3s;
+  }
+  nav.scrolled { background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    cursor: pointer;
+    user-select: none;
+  }
+  .nav-links { display: flex; align-items: center; gap: 8px; }
+  .nav-links button {
+    background: none; border: none; color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    padding: 8px 16px; border-radius: 6px;
+    cursor: pointer; transition: color var(--transition), background var(--transition);
+  }
+  .nav-links button:hover, .nav-links button.active { color: var(--text); background: var(--surface); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-search {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+  }
+  .nav-search input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; width: 180px;
+  }
+  .nav-search input::placeholder { color: var(--text3); }
+  .nav-avatar {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #7b0000);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px; cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ===== PAGES ===== */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative; height: 85vh; min-height: 560px;
+    display: flex; align-items: flex-end;
+    padding: 0 60px 80px;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center top;
+    transition: opacity 1s;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to top,
+      var(--bg) 0%,
+      rgba(10,10,15,0.6) 50%,
+      rgba(10,10,15,0.2) 100%
+    );
+  }
+  .hero-overlay2 {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, rgba(10,10,15,0.8) 0%, transparent 60%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 560px; }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: white;
+    font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 4px; margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 78px);
+    line-height: 1; letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .hero-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .hero-meta span { font-size: 13px; color: var(--text2); }
+  .hero-meta .rating { color: var(--gold); font-weight: 600; }
+  .hero-meta .badge {
+    border: 1px solid var(--text3); border-radius: 4px;
+    padding: 2px 8px; font-size: 11px; color: var(--text3);
+  }
+  .hero-desc {
+    font-size: 15px; line-height: 1.7; color: var(--text2);
+    margin-bottom: 28px; max-width: 440px;
+  }
+  .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: white;
+    border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    padding: 14px 28px; cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .btn-primary:hover { background: #c4070f; transform: translateY(-1px); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.12); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 500;
+    padding: 14px 28px; cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background var(--transition);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+  /* ===== ROW SECTIONS ===== */
+  .section { padding: 40px 40px 10px; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px; letter-spacing: 1px;
+  }
+  .section-more {
+    font-size: 13px; color: var(--text2);
+    background: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .section-more:hover { color: var(--accent); }
+  .row-wrap {
+    overflow-x: auto; padding-bottom: 16px;
+    scrollbar-width: thin; scrollbar-color: var(--surface2) transparent;
+  }
+  .row-wrap::-webkit-scrollbar { height: 4px; }
+  .row-wrap::-webkit-scrollbar-track { background: transparent; }
+  .row-wrap::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+  .card-row { display: flex; gap: 14px; width: max-content; }
+
+  /* ===== CARDS ===== */
+  .card {
+    width: var(--card-w); flex-shrink: 0;
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--surface);
+    cursor: pointer; position: relative;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .card:hover { transform: scale(1.05) translateY(-4px); z-index: 2;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+  .card-thumb {
+    width: 100%; height: var(--card-h);
+    object-fit: cover; display: block;
+    background: var(--surface2);
+  }
+  .card-thumb-div {
+    width: 100%; height: var(--card-h);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .card-body { padding: 10px 12px 12px; }
+  .card-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+  .card-sub { font-size: 11px; color: var(--text2); display: flex; gap: 8px; }
+  .card-sub .dot { color: var(--text3); }
+  .card-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--accent); color: white;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 3px 7px; border-radius: 4px;
+  }
+  .card-play {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity var(--transition);
+  }
+  .card:hover .card-play { opacity: 1; }
+  .play-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 18px;
+  }
+
+  /* ===== TALL CARDS (Portraits) ===== */
+  .card.tall { width: 160px; }
+  .card.tall .card-thumb-div, .card.tall .card-thumb { height: 240px; }
+
+  /* ===== DETAIL PAGE ===== */
+  #detail-page { padding-top: var(--nav-h); }
+  .detail-hero {
+    position: relative; height: 60vh; min-height: 380px;
+    display: flex; align-items: flex-end; padding: 0 60px 50px;
+  }
+  .detail-hero-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+  }
+  .detail-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, var(--bg) 0%, rgba(10,10,15,0.4) 70%);
+  }
+  .detail-overlay2 {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, rgba(10,10,15,0.7) 0%, transparent 70%);
+  }
+  .detail-content { position: relative; z-index: 1; max-width: 600px; }
+  .detail-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1; margin-bottom: 12px;
+  }
+  .detail-body { padding: 30px 60px 60px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 300px; gap: 50px; align-items: start; }
+  .detail-desc { font-size: 16px; line-height: 1.8; color: var(--text2); margin-bottom: 24px; }
+  .detail-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 30px; }
+  .tag {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; font-size: 12px; color: var(--text2);
+    padding: 5px 14px;
+  }
+  .detail-cast h3 { font-size: 13px; color: var(--text2); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 12px; }
+  .cast-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+  .cast-chip {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px;
+    font-size: 13px; font-weight: 500;
+  }
+  .episodes-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 1px; margin-bottom: 16px;
+  }
+  .episode-list { display: flex; flex-direction: column; gap: 10px; }
+  .episode {
+    display: flex; gap: 14px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px;
+    cursor: pointer; transition: background var(--transition);
+  }
+  .episode:hover { background: var(--surface2); }
+  .ep-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    color: var(--text3); width: 28px; flex-shrink: 0; text-align: center;
+  }
+  .ep-thumb {
+    width: 100px; height: 60px; border-radius: 6px;
+    background: var(--surface2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; overflow: hidden;
+  }
+  .ep-info { flex: 1; }
+  .ep-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .ep-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .ep-dur { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .detail-sidebar {}
+  .detail-meta-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .meta-row { display: flex; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px; }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row .label { color: var(--text2); }
+  .meta-row .val { font-weight: 500; text-align: right; }
+
+  /* ===== PLAYER PAGE ===== */
+  #player-page { background: #000; min-height: 100vh; }
+  .player-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: var(--nav-h); display: flex; align-items: center;
+    padding: 0 30px; gap: 20px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+  }
+  .player-back {
+    background: none; border: none; color: white; cursor: pointer;
+    font-size: 14px; display: flex; align-items: center; gap: 8px;
+    font-family: 'DM Sans', sans-serif; opacity: 0.8; transition: opacity 0.2s;
+  }
+  .player-back:hover { opacity: 1; }
+  .player-info { font-size: 15px; font-weight: 600; }
+  .player-ep { font-size: 13px; color: rgba(255,255,255,0.6); }
+  .video-wrapper {
+    width: 100%; padding-top: var(--nav-h);
+    min-height: 100vh; display: flex; align-items: center;
+    justify-content: center; flex-direction: column;
+    gap: 0;
+  }
+  .video-container {
+    width: 100%; max-width: 1200px;
+    aspect-ratio: 16/9; background: #000;
+    position: relative; margin: 0 auto;
+  }
+  .video-container iframe, .video-container video {
+    width: 100%; height: 100%; border: none;
+    display: block;
+  }
+  .video-placeholder {
+    width: 100%; height: 100%; background: #111;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px;
+  }
+  .play-btn-big {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--accent); border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: white; font-size: 28px;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .play-btn-big:hover { transform: scale(1.1); background: #c4070f; }
+  .player-source-sel {
+    display: flex; gap: 10px; padding: 20px 40px;
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  .source-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    padding: 8px 16px; cursor: pointer;
+    transition: all var(--transition);
+  }
+  .source-btn:hover, .source-btn.active {
+    background: var(--accent); border-color: var(--accent); color: white;
+  }
+  .upload-source {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 30px;
+    text-align: center; width: 100%; max-width: 1200px;
+    margin: 0 auto 20px;
+  }
+  .upload-source h3 { font-size: 16px; margin-bottom: 8px; }
+  .upload-source p { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+  .file-input-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface2); border: 1px dashed var(--text3);
+    border-radius: 8px; padding: 12px 24px;
+    cursor: pointer; font-size: 14px; color: var(--text2);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .file-input-label:hover { border-color: var(--accent); color: var(--accent); }
+  .file-input-label input { display: none; }
+  .yt-input-row {
+    display: flex; gap: 10px; max-width: 500px; margin: 0 auto;
+  }
+  .yt-input-row input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    padding: 10px 14px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .yt-input-row input:focus { border-color: var(--accent); }
+  .yt-input-row button {
+    background: var(--accent); border: none; border-radius: 8px;
+    color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 10px 20px; cursor: pointer;
+  }
+  .yt-input-row button:hover { background: #c4070f; }
+
+  /* ===== BROWSE PAGE ===== */
+  #browse-page { padding-top: calc(var(--nav-h) + 40px); padding-bottom: 60px; }
+  .browse-header { padding: 0 40px 30px; }
+  .browse-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px; letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .browse-sub { font-size: 14px; color: var(--text2); }
+  .filter-bar {
+    padding: 0 40px 24px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; padding: 8px 18px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent); border-color: var(--accent); color: white;
+  }
+  .browse-grid {
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .browse-card {
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--surface); cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .browse-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  }
+  .browse-thumb {
+    width: 100%; aspect-ratio: 16/9;
+    object-fit: cover;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .browse-info { padding: 12px; }
+  .browse-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .browse-meta { font-size: 12px; color: var(--text2); display: flex; gap: 8px; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed; bottom: 30px; right: 30px; z-index: 999;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 20px;
+    font-size: 14px; color: var(--text);
+    transform: translateY(80px); opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-search { display: none; }
+    .hero { padding: 0 24px 60px; }
+    .section { padding: 30px 20px 10px; }
+    .detail-body { padding: 20px 20px 40px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .browse-grid { padding: 0 20px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .filter-bar { padding: 0 20px 20px; }
+    .browse-header { padding: 0 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-logo" onclick="showPage('home')">STREAMVAULT</div>
+  <div class="nav-links">
+    <button onclick="showPage('home')" id="nav-home" class="active">Home</button>
+    <button onclick="showPage('browse')" id="nav-browse">Movies</button>
+    <button onclick="showBrowse('tv')" id="nav-tv">TV Shows</button>
+    <button onclick="showBrowse('new')" id="nav-new">New & Hot</button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:#606070"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search titles…" id="search-input" oninput="handleSearch(this.value)">
+    </div>
+    <div class="nav-avatar" title="My Account">U</div>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="home-page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-bg" id="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80')"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-overlay2"></div>
+    <div class="hero-content">
+      <div class="hero-tag">⚡ Featured Today</div>
+      <div class="hero-title">Neon<br>Horizon</div>
+      <div class="hero-meta">
+        <span class="rating">★ 8.7</span>
+        <span>2024</span>
+        <span class="badge">HD</span>
+        <span class="badge">4K</span>
+        <span>2h 18m</span>
+      </div>
+      <div class="hero-desc">In a rain-soaked megacity where memories are currency, a rogue data thief discovers she's been living inside someone else's mind — and must race to reclaim her identity before the system deletes her permanently.</div>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="openPlayer({title:'Neon Horizon', type:'youtube', videoId:'dQw4w9WgXcQ', episode:'Full Movie'})">
+          ▶ Play Now
+        </button>
+        <button class="btn-secondary" onclick="openDetail(CATALOG[0])">ℹ More Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">🔥 Trending Now</div>
+      <button class="section-more" onclick="showPage('browse')">See All →</button>
+    </div>
+    <div class="row-wrap"><div class="card-row" id="trending-row"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Continue Watching</div>
+    </div>
+    <div class="row-wrap"><div class="card-row" id="continue-row"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">🎬 New Releases</div>
+      <button class="section-more" onclick="showBrowse('new')">See All →</button>
+    </div>
+    <div class="row-wrap"><div class="card-row" id="new-row"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">📺 Top TV Shows</div>
+      <button class="section-more" onclick="showBrowse('tv')">See All →</button>
+    </div>
+    <div class="row-wrap"><div class="card-row" id="tv-row"></div></div>
+  </div>
+
+  <div style="height: 60px;"></div>
+</div>
+
+<!-- BROWSE PAGE -->
+<div class="page" id="browse-page">
+  <div class="browse-header">
+    <div class="browse-title" id="browse-title">Browse All</div>
+    <div class="browse-sub" id="browse-sub">Showing all titles in the catalog</div>
+  </div>
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('movie', this)">Movies</button>
+    <button class="filter-btn" onclick="setFilter('tv', this)">TV Shows</button>
+    <button class="filter-btn" onclick="setFilter('action', this)">Action</button>
+    <button class="filter-btn" onclick="setFilter('sci-fi', this)">Sci-Fi</button>
+    <button class="filter-btn" onclick="setFilter('thriller', this)">Thriller</button>
+    <button class="filter-btn" onclick="setFilter('drama', this)">Drama</button>
+    <button class="filter-btn" onclick="setFilter('comedy', this)">Comedy</button>
+    <button class="filter-btn" onclick="setFilter('horror', this)">Horror</button>
+    <button class="filter-btn" onclick="setFilter('documentary', this)">Documentary</button>
+  </div>
+  <div class="browse-grid" id="browse-grid"></div>
+  <div style="height: 60px;"></div>
+</div>
+
+<!-- DETAIL PAGE -->
+<div class="page" id="detail-page">
+  <div class="detail-hero">
+    <div class="detail-hero-bg" id="detail-bg"></div>
+    <div class="detail-overlay"></div>
+    <div class="detail-overlay2"></div>
+    <div class="detail-content">
+      <div class="hero-tag" id="detail-tag">Movie</div>
+      <div class="detail-title" id="detail-title">Title</div>
+      <div class="hero-meta" id="detail-meta"></div>
+      <div class="hero-btns" id="detail-btns"></div>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-grid">
+      <div>
+        <div class="detail-desc" id="detail-desc"></div>
+        <div class="detail-tags" id="detail-tags"></div>
+        <div class="detail-cast" id="detail-cast-section">
+          <h3>Cast</h3>
+          <div class="cast-grid" id="detail-cast"></div>
+        </div>
+        <div id="detail-episodes"></div>
+      </div>
+      <div>
+        <div class="detail-meta-card" id="detail-meta-card"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER PAGE -->
+<div class="page" id="player-page">
+  <div class="player-nav">
+    <button class="player-back" id="player-back">← Back</button>
+    <div>
+      <div class="player-info" id="player-title-display">Title</div>
+      <div class="player-ep" id="player-ep-display"></div>
+    </div>
+  </div>
+  <div class="video-wrapper">
+    <div class="video-container" id="video-container">
+      <div class="video-placeholder" id="video-placeholder">
+        <button class="play-btn-big" id="play-btn-big">▶</button>
+        <div style="font-size:16px; font-weight:600;" id="placeholder-title">Select a source below</div>
+        <div style="font-size:13px; color:var(--text2);">Choose YouTube, Vimeo, or upload your own video file</div>
+      </div>
+    </div>
+    <div class="player-source-sel">
+      <button class="source-btn active" onclick="setPlayerSource('placeholder')">📋 Overview</button>
+      <button class="source-btn" onclick="setPlayerSource('youtube')">▶ YouTube URL</button>
+      <button class="source-btn" onclick="setPlayerSource('vimeo')">🎬 Vimeo URL</button>
+      <button class="source-btn" onclick="setPlayerSource('selfhosted')">📁 Upload Video</button>
+      <button class="source-btn" onclick="setPlayerSource('embed-preset')" id="preset-btn" style="display:none">⚡ Load Preset</button>
+    </div>
+    <div id="source-panel" style="width:100%; max-width:1200px; margin:0 auto; padding:0 40px 30px;"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const CATALOG = [
+  {
+    id:1, title:"Neon Horizon", type:"movie", year:2024, rating:"8.7", duration:"2h 18m",
+    genre:["sci-fi","action","thriller"], badge:"NEW",
+    emoji:"🌃",
+    bg:"https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80",
+    desc:"In a rain-soaked megacity where memories are currency, a rogue data thief discovers she's been living inside someone else's mind — and must race to reclaim her identity before the system deletes her permanently.",
+    cast:["Zara Osei","Marcus Tran","Lila Novak","Demi Castillo","Aaron Voss"],
+    videoId:"dQw4w9WgXcQ", videoType:"youtube",
+    director:"Yuki Tanaka", studio:"NovaCinema", language:"English", subtitles:"12 languages"
+  },
+  {
+    id:2, title:"Crimson Tides", type:"movie", year:2023, rating:"7.9", duration:"1h 52m",
+    genre:["thriller","drama"], badge:null,
+    emoji:"🌊",
+    bg:"https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=1600&q=80",
+    desc:"A forensic diver uncovers a decades-old conspiracy beneath the ocean floor that could bring down governments — if she survives long enough to surface.",
+    cast:["Priya Mehta","Carlos Ruiz","Simone Laurent","T. Blackwood"],
+    videoId:"M7lc1UVf-VE", videoType:"youtube",
+    director:"Carl Johansson", studio:"TidePictures", language:"English", subtitles:"8 languages"
+  },
+  {
+    id:3, title:"Wildfire Season", type:"tv", year:2024, rating:"9.1", duration:"8 Episodes",
+    genre:["drama","thriller"], badge:"SERIES",
+    emoji:"🔥",
+    bg:"https://images.unsplash.com/photo-1542401886-65d6c61db217?w=1600&q=80",
+    desc:"An elite hotshot crew battles impossible odds across one catastrophic fire season, while secrets from within their team threaten to consume them all.",
+    cast:["Rowan Kelsey","Anita Flores","Jin Park","Mia Okonkwo","Sam Delaney"],
+    episodes:[
+      {n:1,title:"First Light",desc:"The crew assembles for the most dangerous season on record.",dur:"52m",emoji:"🌅"},
+      {n:2,title:"Ember Wind",desc:"A shifting wind traps half the team on the wrong side of the blaze.",dur:"48m",emoji:"🌬️"},
+      {n:3,title:"Back Burn",desc:"A desperate plan to fight fire with fire — if it doesn't kill them first.",dur:"55m",emoji:"🔥"},
+      {n:4,title:"Smoke Signals",desc:"Secrets surface as the investigation into the fire's origin deepens.",dur:"50m",emoji:"💨"},
+      {n:5,title:"The Wall",desc:"The crew faces the fire's fury at the town's last line of defense.",dur:"54m",emoji:"🏔️"},
+      {n:6,title:"Lost",desc:"A missing team member sends everyone into a desperate search.",dur:"49m",emoji:"🌲"},
+      {n:7,title:"Flashover",desc:"Everything changes in seconds when the fire makes an unexpected turn.",dur:"58m",emoji:"⚡"},
+      {n:8,title:"Aftermath",desc:"The season ends — but for the crew, nothing will ever be the same.",dur:"64m",emoji:"🌤️"}
+    ],
+    videoId:"9bZkp7q19f0", videoType:"youtube",
+    director:"Amara Diallo", studio:"BlazeProd", language:"English", subtitles:"15 languages"
+  },
+  {
+    id:4, title:"Laughing Gas", type:"movie", year:2024, rating:"7.4", duration:"1h 38m",
+    genre:["comedy"], badge:null,
+    emoji:"😂",
+    bg:"https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1600&q=80",
+    desc:"A dentist accidentally stumbles into a witness protection program and must moonlight as a stand-up comedian to maintain his cover while falling for his handler.",
+    cast:["Brennan Walsh","Sofia Kim","Greg Hartley","Pearl Osei"],
+    videoId:"2vjPBrBU-TM", videoType:"youtube",
+    director:"Tomás Ferreira", studio:"LightFilms", language:"English", subtitles:"6 languages"
+  },
+  {
+    id:5, title:"The Deep Archive", type:"tv", year:2023, rating:"8.4", duration:"6 Episodes",
+    genre:["sci-fi","drama"], badge:"SERIES",
+    emoji:"🌌",
+    bg:"https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1600&q=80",
+    desc:"Scientists aboard a deep space station begin receiving transmissions from a civilization that collapsed 10,000 years ago — and the messages are getting more recent.",
+    cast:["Yuki Harada","Brice Nkosi","Farah Kasim","Lee Morgan","Dana Voss"],
+    episodes:[
+      {n:1,title:"First Contact",desc:"The signal arrives and nothing is the same.",dur:"48m",emoji:"📡"},
+      {n:2,title:"Translation",desc:"Decoding the messages reveals something terrifying.",dur:"44m",emoji:"🔍"},
+      {n:3,title:"Echoes",desc:"The transmissions describe events happening on the station — right now.",dur:"50m",emoji:"🔊"},
+      {n:4,title:"Convergence",desc:"Two timelines begin to collapse into one.",dur:"46m",emoji:"⏳"},
+      {n:5,title:"The Architects",desc:"The truth about who built the archive is revealed.",dur:"52m",emoji:"🏛️"},
+      {n:6,title:"Terminus",desc:"The crew must make an impossible choice.",dur:"67m",emoji:"🌠"}
+    ],
+    videoId:"ZSS5dEeMX64", videoType:"youtube",
+    director:"Leena Patel", studio:"HorizonStudios", language:"English", subtitles:"10 languages"
+  },
+  {
+    id:6, title:"Hollow Ground", type:"movie", year:2024, rating:"7.6", duration:"1h 44m",
+    genre:["horror","thriller"], badge:"NEW",
+    emoji:"👻",
+    bg:"https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=1600&q=80",
+    desc:"An archaeological dig in rural France unearths something ancient — and deeply wrong. As the team begins to disappear one by one, the last survivor must face what lives beneath.",
+    cast:["Margot Lefebvre","Anton Cross","Bisi Adeyemi","Helene Dumas"],
+    videoId:"6JnGBs88sL4", videoType:"youtube",
+    director:"Pascal Moreau", studio:"NightVision", language:"French/English", subtitles:"9 languages"
+  },
+  {
+    id:7, title:"Velocity", type:"movie", year:2023, rating:"7.2", duration:"2h 02m",
+    genre:["action","sci-fi"], badge:null,
+    emoji:"🚀",
+    bg:"https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=80",
+    desc:"The world's fastest fighter pilot is recruited for a classified mission beyond Earth's atmosphere — but the real enemy is already on board.",
+    cast:["Dani Park","Theo Cross","Ana Reyes","Victor Stein"],
+    videoId:"ZRtdQ81jPTQ", videoType:"youtube",
+    director:"Zara Mbeki", studio:"SpeedHouse", language:"English", subtitles:"11 languages"
+  },
+  {
+    id:8, title:"Paper Crown", type:"tv", year:2024, rating:"8.8", duration:"10 Episodes",
+    genre:["drama"], badge:"NEW",
+    emoji:"👑",
+    bg:"https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1600&q=80",
+    desc:"A ruthless media empire fractures after the death of its matriarch, as her three heirs wage war with secrets, manipulation, and the power of the press.",
+    cast:["Helena Cross","Dominic Shaw","Yara Ito","Marcus Bell","Celia Vance"],
+    episodes:[
+      {n:1,title:"The Will",desc:"The reading of the will ignites a war none of them expected.",dur:"58m",emoji:"📜"},
+      {n:2,title:"Leverage",desc:"Each sibling plays their first card.",dur:"52m",emoji:"🃏"},
+      {n:3,title:"The Interview",desc:"A live broadcast goes dangerously off script.",dur:"55m",emoji:"🎙️"},
+      {n:4,title:"Old Debts",desc:"Secrets from their mother's past are weaponized.",dur:"50m",emoji:"💼"},
+      {n:5,title:"Short Sell",desc:"The board votes, and everything shifts.",dur:"54m",emoji:"📉"},
+      {n:6,title:"Page One",desc:"A leak threatens to destroy them all.",dur:"48m",emoji:"📰"},
+      {n:7,title:"Trust",desc:"An unlikely alliance forms against a common enemy.",dur:"56m",emoji:"🤝"},
+      {n:8,title:"The Pitch",desc:"They face the press — and each other.",dur:"53m",emoji:"🎤"},
+      {n:9,title:"Bloodlines",desc:"The truth about their father emerges.",dur:"58m",emoji:"🩸"},
+      {n:10,title:"Succession",desc:"Only one can inherit the empire. And the cost is everything.",dur:"72m",emoji:"🏆"}
+    ],
+    videoId:"QdrDNJGxWgE", videoType:"youtube",
+    director:"Miriam Osei", studio:"PressRoom", language:"English", subtitles:"18 languages"
+  },
+  {
+    id:9, title:"Concrete Jungle", type:"movie", year:2024, rating:"8.0", duration:"1h 58m",
+    genre:["action","drama"], badge:null,
+    emoji:"🏙️",
+    bg:"https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600&q=80",
+    desc:"A retired hitman in Lagos reluctantly returns to the underworld when his daughter is drawn into the city's most dangerous syndicate.",
+    cast:["Emeka Okafor","Chioma Eze","Dele Bello","Nneka Adaobi"],
+    videoId:"IUN664s7N1c", videoType:"youtube",
+    director:"Kunle Afolayan", studio:"AfriFilms", language:"English/Yoruba", subtitles:"14 languages"
+  },
+  {
+    id:10, title:"Mind the Gap", type:"movie", year:2023, rating:"7.8", duration:"1h 46m",
+    genre:["documentary"], badge:null,
+    emoji:"🧠",
+    bg:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=80",
+    desc:"A groundbreaking look at the neuroscience of inequality — how poverty physically reshapes the human brain, and whether the damage can be undone.",
+    cast:["Dr. Sarah Obi","Prof. Jean-Luc Renaud","Dr. Amina Traoré"],
+    videoId:"wupToqz1e2g", videoType:"youtube",
+    director:"Anya Stern", studio:"DocHouse", language:"English/French", subtitles:"20 languages"
+  },
+  {
+    id:11, title:"Fault Lines", type:"tv", year:2023, rating:"8.5", duration:"7 Episodes",
+    genre:["thriller","drama"], badge:"SERIES",
+    emoji:"⚡",
+    bg:"https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&q=80",
+    desc:"A seismologist discovers that the tremors shaking a major city are not geological — they're man-made. And someone very powerful wants her to stop looking.",
+    cast:["Nadia Al-Rashid","Tomás Herrera","Grace Liu","Patrick Osei"],
+    episodes:[
+      {n:1,title:"First Tremor",desc:"Something underground is waking up.",dur:"50m",emoji:"🌍"},
+      {n:2,title:"Frequency",desc:"The pattern reveals an impossible source.",dur:"46m",emoji:"📊"},
+      {n:3,title:"Pressure",desc:"The government arrives — and the questions stop.",dur:"52m",emoji:"🏛️"},
+      {n:4,title:"Depth Charge",desc:"A dive into the corporate records shakes everything loose.",dur:"48m",emoji:"💣"},
+      {n:5,title:"Aftershock",desc:"The truth is bigger than the city.",dur:"54m",emoji:"🌐"},
+      {n:6,title:"Epicenter",desc:"They trace it to the source.",dur:"50m",emoji:"📍"},
+      {n:7,title:"Collapse",desc:"Everything falls apart — and they have 48 hours to stop it.",dur:"68m",emoji:"🏚️"}
+    ],
+    videoId:"1La4QzGeaaQ", videoType:"youtube",
+    director:"Lena Johansson", studio:"QuakeFilms", language:"English", subtitles:"12 languages"
+  },
+  {
+    id:12, title:"Sweet Revenge", type:"movie", year:2024, rating:"7.5", duration:"1h 42m",
+    genre:["comedy","romance"], badge:"NEW",
+    emoji:"🍰",
+    bg:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1600&q=80",
+    desc:"When a pastry chef discovers her ex is a food critic writing a hit piece on her bakery, she decides the best response is to win him back — and humiliate him on live television.",
+    cast:["Isla Park","Ricardo Vega","Margot Blanc","Dennis Cho"],
+    videoId:"ywWqHWOpVNM", videoType:"youtube",
+    director:"Claudia Santos", studio:"SugarCoat", language:"English", subtitles:"7 languages"
+  }
+];
+
+let currentDetail = null;
+let currentPlayerItem = null;
+let currentPlayerSource = 'placeholder';
+let activeFilter = 'all';
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(name + '-page').classList.add('active');
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById('nav-' + name);
+  if (navBtn) navBtn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showBrowse(filter) {
+  showPage('browse');
+  if (filter === 'tv') {
+    setFilter('tv', document.querySelectorAll('.filter-btn')[2]);
+    document.getElementById('browse-title').textContent = 'TV Shows';
+    document.getElementById('nav-tv').classList.add('active');
+  } else if (filter === 'new') {
+    setFilter('all', document.querySelectorAll('.filter-btn')[0]);
+    document.getElementById('browse-title').textContent = 'New & Hot';
+    document.getElementById('nav-new').classList.add('active');
+  } else {
+    document.getElementById('nav-browse').classList.add('active');
+  }
+  renderBrowse();
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderBrowse();
+}
+
+function renderBrowse() {
+  const grid = document.getElementById('browse-grid');
+  let items = activeFilter === 'all' ? CATALOG : CATALOG.filter(c => c.type === activeFilter || c.genre.includes(activeFilter));
+  document.getElementById('browse-sub').textContent = `${items.length} title${items.length !== 1 ? 's' : ''} available`;
+  grid.innerHTML = items.map(item => `
+    <div class="browse-card" onclick="openDetail(CATALOG.find(c=>c.id===${item.id}))">
+      <div class="browse-thumb" style="${item.bg ? `background-image:url('${item.bg}');background-size:cover;background-position:center` : ''}">
+        ${!item.bg ? item.emoji : ''}
+      </div>
+      <div class="browse-info">
+        <div class="browse-name">${item.title}</div>
+        <div class="browse-meta">
+          <span>★ ${item.rating}</span>
+          <span>·</span>
+          <span>${item.year}</span>
+          <span>·</span>
+          <span>${item.type === 'tv' ? 'Series' : 'Movie'}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function makeCard(item, tall) {
+  const cl = tall ? 'card tall' : 'card';
+  return `<div class="${cl}" onclick="openDetail(CATALOG.find(c=>c.id===${item.id}))">
+    <div class="card-thumb-div" style="${item.bg ? `background-image:url('${item.bg}');background-size:cover;background-position:center;width:100%;height:${tall?'240px':'130px'}` : ''}">
+      ${!item.bg ? `<span style="font-size:${tall?'64':'48'}px">${item.emoji}</span>` : ''}
+    </div>
+    ${item.badge ? `<div class="card-badge">${item.badge}</div>` : ''}
+    <div class="card-play"><div class="play-icon">▶</div></div>
+    <div class="card-body">
+      <div class="card-title">${item.title}</div>
+      <div class="card-sub"><span>★ ${item.rating}</span><span class="dot">·</span><span>${item.year}</span></div>
+    </div>
+  </div>`;
+}
+
+function openDetail(item) {
+  if (!item) return;
+  currentDetail = item;
+  showPage('detail');
+
+  document.getElementById('detail-bg').style.cssText = item.bg
+    ? `background-image:url('${item.bg}');background-size:cover;background-position:center;position:absolute;inset:0`
+    : `background:var(--surface);position:absolute;inset:0`;
+
+  document.getElementById('detail-tag').textContent = item.type === 'tv' ? '📺 TV Series' : '🎬 Movie';
+  document.getElementById('detail-title').textContent = item.title;
+
+  document.getElementById('detail-meta').innerHTML = `
+    <span class="rating">★ ${item.rating}</span>
+    <span>${item.year}</span>
+    <span class="badge">HD</span>
+    <span>${item.duration}</span>
+  `;
+
+  document.getElementById('detail-btns').innerHTML = `
+    <button class="btn-primary" onclick="openPlayer({title:'${item.title}',type:'${item.videoType}',videoId:'${item.videoId}',episode:'${item.type==='tv'?'S1 E1':'Full Movie'}'})">▶ Play</button>
+    <button class="btn-secondary" onclick="showToast('Added to My List ✓')">+ My List</button>
+  `;
+
+  document.getElementById('detail-desc').textContent = item.desc;
+
+  document.getElementById('detail-tags').innerHTML = item.genre.map(g =>
+    `<span class="tag">${g.charAt(0).toUpperCase()+g.slice(1)}</span>`
+  ).join('');
+
+  document.getElementById('detail-cast').innerHTML = item.cast.map(c =>
+    `<div class="cast-chip">${c}</div>`
+  ).join('');
+
+  const epSection = document.getElementById('detail-episodes');
+  if (item.episodes) {
+    epSection.innerHTML = `<div class="episodes-title">Episodes</div>
+      <div class="episode-list">
+        ${item.episodes.map(ep => `
+          <div class="episode" onclick="openPlayer({title:'${item.title}',type:'${item.videoType}',videoId:'${item.videoId}',episode:'S1 E${ep.n}: ${ep.title}'})">
+            <div class="ep-num">${ep.n}</div>
+            <div class="ep-thumb">${ep.emoji}</div>
+            <div class="ep-info">
+              <div class="ep-title">${ep.title}</div>
+              <div class="ep-desc">${ep.desc}</div>
+            </div>
+            <div class="ep-dur">${ep.dur}</div>
+          </div>`).join('')}
+      </div>`;
+  } else {
+    epSection.innerHTML = '';
+  }
+
+  document.getElementById('detail-meta-card').innerHTML = `
+    <div class="meta-row"><span class="label">Director</span><span class="val">${item.director}</span></div>
+    <div class="meta-row"><span class="label">Studio</span><span class="val">${item.studio}</span></div>
+    <div class="meta-row"><span class="label">Language</span><span class="val">${item.language}</span></div>
+    <div class="meta-row"><span class="label">Subtitles</span><span class="val">${item.subtitles}</span></div>
+    <div class="meta-row"><span class="label">Rating</span><span class="val">★ ${item.rating} / 10</span></div>
+    <div class="meta-row"><span class="label">Duration</span><span class="val">${item.duration}</span></div>
+    <div class="meta-row"><span class="label">Released</span><span class="val">${item.year}</span></div>
+    <div class="meta-row"><span class="label">Genre</span><span class="val">${item.genre.map(g=>g.charAt(0).toUpperCase()+g.slice(1)).join(', ')}</span></div>
+  `;
+}
+
+function openPlayer(opts) {
+  currentPlayerItem = opts;
+  showPage('player');
+  document.getElementById('player-title-display').textContent = opts.title;
+  document.getElementById('player-ep-display').textContent = opts.episode || '';
+  document.getElementById('player-back').onclick = () => {
+    if (currentDetail) openDetail(currentDetail);
+    else showPage('home');
+  };
+  const presetBtn = document.getElementById('preset-btn');
+  if (opts.videoId) {
+    presetBtn.style.display = '';
+    presetBtn.textContent = opts.type === 'youtube' ? '▶ YouTube Preset' : '🎬 Vimeo Preset';
+  } else {
+    presetBtn.style.display = 'none';
+  }
+  setPlayerSource('placeholder');
+}
+
+function setPlayerSource(src) {
+  currentPlayerSource = src;
+  document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+  event && event.target && event.target.classList.add('active');
+
+  const vc = document.getElementById('video-container');
+  const sp = document.getElementById('source-panel');
+
+  if (src === 'placeholder') {
+    vc.innerHTML = `<div class="video-placeholder">
+      <div style="font-size:64px">${currentPlayerItem ? '🎬' : '📽️'}</div>
+      <div style="font-size:18px;font-weight:600;">${currentPlayerItem ? currentPlayerItem.title : 'No video selected'}</div>
+      <div style="font-size:13px;color:var(--text2);">${currentPlayerItem ? currentPlayerItem.episode || '' : 'Choose a source below'}</div>
+    </div>`;
+    sp.innerHTML = '';
+  } else if (src === 'embed-preset' && currentPlayerItem && currentPlayerItem.videoId) {
+    const t = currentPlayerItem.type;
+    let embedUrl = t === 'vimeo'
+      ? `https://player.vimeo.com/video/${currentPlayerItem.videoId}?autoplay=1`
+      : `https://www.youtube.com/embed/${currentPlayerItem.videoId}?autoplay=1&rel=0`;
+    vc.innerHTML = `<iframe src="${embedUrl}" allowfullscreen allow="autoplay; encrypted-media; fullscreen" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+    sp.innerHTML = '';
+  } else if (src === 'youtube') {
+    vc.innerHTML = `<div class="video-placeholder">
+      <div style="font-size:48px">▶</div>
+      <div style="font-size:15px;color:var(--text2);">Paste a YouTube URL below</div>
+    </div>`;
+    sp.innerHTML = `<div class="upload-source">
+      <h3>YouTube Video</h3>
+      <p>Paste a YouTube video URL to play it here</p>
+      <div class="yt-input-row">
+        <input type="text" id="yt-url" placeholder="https://www.youtube.com/watch?v=..." />
+        <button onclick="loadYouTube()">Load</button>
+      </div>
+    </div>`;
+  } else if (src === 'vimeo') {
+    vc.innerHTML = `<div class="video-placeholder">
+      <div style="font-size:48px">🎬</div>
+      <div style="font-size:15px;color:var(--text2);">Paste a Vimeo URL below</div>
+    </div>`;
+    sp.innerHTML = `<div class="upload-source">
+      <h3>Vimeo Video</h3>
+      <p>Paste a Vimeo video URL to embed it</p>
+      <div class="yt-input-row">
+        <input type="text" id="vimeo-url" placeholder="https://vimeo.com/123456789" />
+        <button onclick="loadVimeo()">Load</button>
+      </div>
+    </div>`;
+  } else if (src === 'selfhosted') {
+    vc.innerHTML = `<div class="video-placeholder">
+      <div style="font-size:48px">📁</div>
+      <div style="font-size:15px;color:var(--text2);">Upload your video file below</div>
+    </div>`;
+    sp.innerHTML = `<div class="upload-source">
+      <h3>Upload Your Video</h3>
+      <p>Supports MP4, WebM, MKV, OGV and other browser-supported formats</p>
+      <label class="file-input-label">
+        📁 Choose Video File
+        <input type="file" accept="video/*" onchange="loadLocalVideo(this)">
+      </label>
+    </div>`;
+  }
+}
+
+function loadYouTube() {
+  const raw = document.getElementById('yt-url').value.trim();
+  let id = '';
+  try {
+    const u = new URL(raw);
+    if (u.hostname.includes('youtu.be')) id = u.pathname.slice(1);
+    else id = u.searchParams.get('v');
+  } catch(e) { id = raw; }
+  if (!id) { showToast('Invalid YouTube URL'); return; }
+  document.getElementById('video-container').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media; fullscreen" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+  document.getElementById('source-panel').innerHTML = '';
+}
+
+function loadVimeo() {
+  const raw = document.getElementById('vimeo-url').value.trim();
+  let id = raw.replace(/.*vimeo\.com\//, '').split('/')[0].split('?')[0];
+  if (!id || isNaN(id)) { showToast('Invalid Vimeo URL'); return; }
+  document.getElementById('video-container').innerHTML = `<iframe src="https://player.vimeo.com/video/${id}?autoplay=1" allowfullscreen allow="autoplay; encrypted-media; fullscreen" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+  document.getElementById('source-panel').innerHTML = '';
+}
+
+function loadLocalVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  document.getElementById('video-container').innerHTML = `<video src="${url}" controls autoplay style="width:100%;height:100%;background:#000;display:block;"></video>`;
+  document.getElementById('source-panel').innerHTML = '';
+  showToast('✓ Playing: ' + file.name);
+}
+
+function handleSearch(q) {
+  if (!q.trim()) return;
+  showPage('browse');
+  const items = CATALOG.filter(c => c.title.toLowerCase().includes(q.toLowerCase()) || c.genre.some(g => g.includes(q.toLowerCase())));
+  const grid = document.getElementById('browse-grid');
+  document.getElementById('browse-title').textContent = `Results for "${q}"`;
+  document.getElementById('browse-sub').textContent = `${items.length} title${items.length !== 1 ? 's' : ''} found`;
+  grid.innerHTML = items.map(item => `
+    <div class="browse-card" onclick="openDetail(CATALOG.find(c=>c.id===${item.id}))">
+      <div class="browse-thumb" style="${item.bg ? `background-image:url('${item.bg}');background-size:cover;background-position:center` : ''}">
+        ${!item.bg ? item.emoji : ''}
+      </div>
+      <div class="browse-info">
+        <div class="browse-name">${item.title}</div>
+        <div class="browse-meta"><span>★ ${item.rating}</span><span>·</span><span>${item.year}</span></div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--text2);padding:40px;text-align:center;grid-column:1/-1">No results found</div>';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+  document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// Build homepage rows
+function buildRows() {
+  const trending = CATALOG.filter(c => ['1','2','3','4','5'].map(Number).includes(c.id));
+  const cont = CATALOG.filter(c => [7,9,11].includes(c.id));
+  const newRel = CATALOG.filter(c => c.badge === 'NEW');
+  const tv = CATALOG.filter(c => c.type === 'tv');
+
+  document.getElementById('trending-row').innerHTML = trending.map(c => makeCard(c, false)).join('');
+  document.getElementById('continue-row').innerHTML = cont.map(c => makeCard(c, false)).join('');
+  document.getElementById('new-row').innerHTML = newRel.map(c => makeCard(c, false)).join('');
+  document.getElementById('tv-row').innerHTML = tv.map(c => makeCard(c, false)).join('');
+}
+
+buildRows();
+renderBrowse();
+</script>
+</body>
+</html>
