@@ -8,79 +8,185 @@
 </head>
 <body class="bg-gray-950 text-white font-sans selection:bg-red-600 selection:text-white">
 
-  <!-- Navigation Bar -->
-  <nav class="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+  <nav class="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-md border-b border-gray-800 px-4 md:px-16 py-4 flex items-center justify-between">
     <div class="flex items-center space-x-8">
-      <h1 class="text-2xl font-black tracking-wider text-red-600 uppercase">MovieClub</h1>
+      <h1 class="text-2xl font-black tracking-wider text-red-600 uppercase cursor-pointer" onclick="loadDefaultHome()">MovieClub</h1>
       <div class="hidden md:flex space-x-6 text-sm font-medium text-gray-300">
-        <a href="#" class="hover:text-white transition">Home</a>
-        <a href="#" class="hover:text-white transition">Movies</a>
-        <a href="#" class="hover:text-white transition">TV Shows</a>
-        <a href="#" class="hover:text-white transition">My Watchlist</a>
+        <a href="#" onclick="loadDefaultHome()" class="hover:text-white transition">Home</a>
+        <a href="#" onclick="fetchCategory('movie/top_rated', 'Top Rated Movies')" class="hover:text-white transition">Top Rated</a>
+        <a href="#" onclick="fetchCategory('movie/upcoming', 'Upcoming')" class="hover:text-white transition">Upcoming</a>
       </div>
     </div>
     <div class="flex items-center space-x-4">
-      <input type="text" placeholder="Search movies..." class="bg-gray-900 border border-gray-700 text-sm px-4 py-2 rounded-full focus:outline-none focus:border-red-600 text-gray-200 w-48 sm:w-64 transition-all">
-      <button class="bg-red-600 hover:bg-red-700 px-5 py-2 text-sm font-semibold rounded-full transition shadow-lg shadow-red-600/20">Sign In</button>
+      <div class="relative">
+        <input type="text" id="search-input" placeholder="Search movies..." class="bg-gray-900 border border-gray-700 text-sm px-4 py-2 rounded-full focus:outline-none focus:border-red-600 text-gray-200 w-40 sm:w-64 transition-all">
+      </div>
+      <button class="bg-red-600 hover:bg-red-700 px-5 py-2 text-sm font-semibold rounded-full transition shadow-lg shadow-red-600/20 whitespace-nowrap">Sign In</button>
     </div>
   </nav>
 
-  <!-- Hero Section (Featured Movie) -->
-  <header class="relative h-[70vh] flex items-end p-8 md:p-16 overflow-hidden bg-cover bg-center" style="background-image: linear-gradient(to top, #030712 10%, transparent 60%), url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925');">
+  <header id="hero-banner" class="relative h-[65vh] md:h-[75vh] flex items-end p-6 md:p-16 overflow-hidden bg-cover bg-center transition-all duration-500" style="background-image: linear-gradient(to top, #030712 10%, transparent 70%), url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925');">
     <div class="relative z-10 max-w-2xl space-y-4">
-      <span class="bg-red-600/20 text-red-500 border border-red-600/30 text-xs font-bold uppercase px-3 py-1 rounded-md tracking-wider">Trending Now</span>
-      <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight">Cinematic Journeys</h2>
-      <p class="text-gray-300 text-sm md:text-base leading-relaxed">Explore breathtaking visuals and unmissable stories crafted by visionary directors. Stream thousands of handpicked cult classics and modern masterpieces today.</p>
+      <span class="bg-red-600/20 text-red-500 border border-red-600/30 text-xs font-bold uppercase px-3 py-1 rounded-md tracking-wider">Featured Blockbuster</span>
+      <h2 id="hero-title" class="text-3xl md:text-6xl font-extrabold tracking-tight">Loading Features...</h2>
+      <p id="hero-overview" class="text-gray-300 text-xs md:text-sm leading-relaxed line-clamp-3 md:line-clamp-none">Please wait while we connect to cinema databases.</p>
       <div class="pt-2 flex space-x-4">
-        <button class="bg-white text-black hover:bg-gray-200 px-6 py-3 font-bold rounded-lg transition flex items-center space-x-2">
-          <span>Play Trailer</span>
+        <button class="bg-white text-black hover:bg-gray-200 px-5 py-2.5 font-bold rounded-lg transition flex items-center space-x-2 text-sm">
+          <span>▶ Watch Now</span>
         </button>
-        <button class="bg-gray-800/80 hover:bg-gray-700/80 backdrop-blur-sm text-white px-6 py-3 font-bold rounded-lg transition border border-gray-700">
+        <button class="bg-gray-800/80 hover:bg-gray-700/80 backdrop-blur-sm text-white px-5 py-2.5 font-bold rounded-lg transition border border-gray-700 text-sm">
           + Watchlist
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content / Movie Grids -->
-  <main class="px-6 md:px-16 py-12 space-y-12">
+  <main class="px-4 md:px-16 py-12 space-y-12">
     
-    <!-- Category Block -->
     <section class="space-y-6">
       <div class="flex items-center justify-between border-b border-gray-800 pb-3">
-        <h3 class="text-xl md:text-2xl font-bold tracking-wide">Popular Releases</h3>
-        <a href="#" class="text-xs font-semibold uppercase text-red-500 hover:underline tracking-wider">View All</a>
+        <h3 id="section-title" class="text-xl md:text-2xl font-bold tracking-wide">Popular Releases</h3>
+        <span id="movie-count" class="text-xs text-gray-500 font-medium"></span>
       </div>
       
-      <!-- Responsive Responsive Grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-        
-        <!-- Movie Card Template (Repeat this block dynamically) -->
-        <div class="group relative bg-gray-900 rounded-xl overflow-hidden cursor-pointer border border-gray-800 hover:border-gray-700 transition duration-300 transform hover:-translate-y-1 shadow-lg">
-          <div class="aspect-[2/3] w-full bg-gray-800 overflow-hidden relative">
-            <!-- Sample Poster Image -->
-            <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1000" alt="Movie Poster" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-            <span class="absolute top-2 right-2 bg-gray-950/80 backdrop-blur-md text-yellow-500 text-xs font-bold px-2 py-0.5 rounded border border-gray-800">HD</span>
-          </div>
-          <div class="p-4 space-y-1">
-            <h4 class="font-bold text-sm truncate group-hover:text-red-500 transition">The Grand Premiere</h4>
-            <div class="flex items-center justify-between text-xs text-gray-400">
-              <span>2026</span>
-              <span class="text-yellow-500 font-medium">★ 8.4</span>
-            </div>
-          </div>
-        </div>
-        <!-- End Movie Card Template -->
-
+      <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        <p class="text-gray-400 col-span-full text-center py-10">Loading catalog items...</p>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer -->
   <footer class="border-t border-gray-900 bg-gray-950 px-6 py-8 text-center text-xs text-gray-500">
-    <p>&copy; 2026 MovieClub. Built for cinema enthusiasts. Powered by public API streaming catalogs.</p>
+    <p>&copy; 2026 MovieClub. Synchronized with public database systems. Built for personal portfolios.</p>
   </footer>
 
+  <script>
+    const API_KEY = '8baf63504edac868f508ee3c0ac18f0f';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    const IMAGE_URL = 'https://image.tmdb.org/t/p/w1280'; // high-res for banner
+    const POSTER_URL = 'https://image.tmdb.org/t/p/w500'; // regular size for cards
+
+    const movieGrid = document.getElementById('movie-grid');
+    const sectionTitle = document.getElementById('section-title');
+    const movieCount = document.getElementById('movie-count');
+    const searchInput = document.getElementById('search-input');
+
+    // Hero elements
+    const heroBanner = document.getElementById('hero-banner');
+    const heroTitle = document.getElementById('hero-title');
+    const heroOverview = document.getElementById('hero-overview');
+
+    // Default configuration initialization
+    async function initApp() {
+      await loadHeroSection();
+      await fetchCategory('movie/popular', 'Popular Releases');
+      setupSearch();
+    }
+
+    // Dynamic Top Header Loader
+    async function loadHeroSection() {
+      try {
+        const response = await fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
+        const data = await response.json();
+        if(data.results && data.results.length > 0) {
+          const topMovie = data.results[0]; // Fetch the #1 trending item
+          heroTitle.innerText = topMovie.title;
+          heroOverview.innerText = topMovie.overview;
+          if(topMovie.backdrop_path) {
+            heroBanner.style.backgroundImage = `linear-gradient(to top, #030712 10%, transparent 70%), url('${IMAGE_URL}${topMovie.backdrop_path}')`;
+          }
+        }
+      } catch (error) {
+        console.error("Hero display connection error:", error);
+      }
+    }
+
+    // Reusable Category Switcher
+    async function fetchCategory(endpoint, titleLabel) {
+      try {
+        movieGrid.innerHTML = '<p class="text-gray-400 col-span-full text-center py-10">Updating shelf contents...</p>';
+        sectionTitle.innerText = titleLabel;
+        movieCount.innerText = '';
+
+        const response = await fetch(`${BASE_URL}/${endpoint}?api_key=${API_KEY}&language=en-US&page=1`);
+        const data = await response.json();
+        
+        renderGrid(data.results);
+      } catch (error) {
+        showError();
+      }
+    }
+
+    // Dynamic Search Infrastructure
+    void function setupSearch() {
+      let typingTimer;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(async () => {
+          const query = searchInput.value.trim();
+          if (query.length > 1) {
+            try {
+              sectionTitle.innerText = `Search Results for "${query}"`;
+              movieGrid.innerHTML = '<p class="text-gray-400 col-span-full text-center py-10">Searching archives...</p>';
+              
+              const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1`);
+              const data = await response.json();
+              
+              movieCount.innerText = `(${data.results.length} found)`;
+              renderGrid(data.results);
+            } catch (error) {
+              showError();
+            }
+          } else if (query.length === 0) {
+            loadDefaultHome();
+          }
+        }, 400); // 400ms debounce buffer time to save API rate allotments
+      });
+    }();
+
+    // Core Template Builder and Interface Renderer
+    function renderGrid(movies) {
+      movieGrid.innerHTML = '';
+      if (!movies || movies.length === 0) {
+        movieGrid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">No movies found matching your request.</p>';
+        return;
+      }
+
+      movies.forEach(movie => {
+        const poster = movie.poster_path ? `${POSTER_URL}${movie.poster_path}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1000';
+        const year = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+        const score = movie.vote_average ? movie.vote_average.toFixed(1) : 'NR';
+
+        const card = `
+          <div class="group relative bg-gray-900 rounded-xl overflow-hidden cursor-pointer border border-gray-800 hover:border-gray-700 transition duration-300 transform hover:-translate-y-1 shadow-lg">
+            <div class="aspect-[2/3] w-full bg-gray-800 overflow-hidden relative">
+              <img src="${poster}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
+              <span class="absolute top-2 right-2 bg-gray-950/80 backdrop-blur-md text-yellow-500 text-xs font-bold px-2 py-0.5 rounded border border-gray-800">HD</span>
+            </div>
+            <div class="p-4 space-y-1">
+              <h4 class="font-bold text-sm truncate group-hover:text-red-500 transition" title="${movie.title}">${movie.title}</h4>
+              <div class="flex items-center justify-between text-xs text-gray-400">
+                <span>${year}</span>
+                <span class="text-yellow-500 font-medium">★ ${score}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        movieGrid.innerHTML += card;
+      });
+    }
+
+    function loadDefaultHome() {
+      searchInput.value = '';
+      fetchCategory('movie/popular', 'Popular Releases');
+    }
+
+    function showError() {
+      movieGrid.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Network exception or invalid query payload. Please try again.</p>';
+    }
+
+    // Trigger on structural initial load
+    initApp();
+  </script>
 </body>
 </html>
