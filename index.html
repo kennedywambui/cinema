@@ -57,7 +57,6 @@
   <div id="video-modal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
     <div class="relative w-full max-w-4xl aspect-video bg-gray-900 rounded-xl overflow-hidden border border-gray-800 shadow-2xl">
       <button onclick="closeVideoPlayer()" class="absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white h-10 w-10 flex items-center justify-center rounded-full border border-gray-700 font-bold transition z-50">✕</button>
-      <!-- Embed container node -->
       <div id="player-target" class="w-full h-full"></div>
     </div>
   </div>
@@ -89,13 +88,38 @@
 
     let mode = 'home'; // 'home', 'search', or 'watchlist'
     let watchlist = JSON.parse(localStorage.getItem('movieclub_watchlist')) || [];
+    
+    // Global pagination object tracker to monitor separate states for individual rows
+    let rowPaginationTracker = {};
+    let trackObserver;
 
     // App Initialize entry block
     async function initApp() {
       updateWatchlistBadge();
+      initIntersectionObserver();
       await loadHeroSection();
       await buildNetflixShelves();
       setupSearch();
+    }
+
+    // Initialize global intersection controller targeting horizontal anchors
+    function initIntersectionObserver() {
+      trackObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const targetRowId = entry.target.dataset.rowId;
+            const endpoint = entry.target.dataset.endpoint;
+            
+            // Check flags to avoid racing loops or over-fetching past total counts
+            if (rowPaginationTracker[targetRowId] && !rowPaginationTracker[targetRowId].isFetching) {
+              fetchNextRowPage(targetRowId, endpoint);
+            }
+          }
+        });
+      }, {
+        root: null, // Scans within the layout context view window bounds
+        rootMargin: '0px 300px 0px 0px' // Pre-fetches entries 300px before sliding completely past edge view
+      });
     }
 
     // Dynamic Top Header Loader
@@ -117,12 +141,12 @@
       }
     }
 
-    // High performance Netflix multi-shelf content builder
+    // Build configuration and map states natively
     async function buildNetflixShelves() {
       mode = 'home';
       dynamicShelves.innerHTML = '';
+      rowPaginationTracker = {}; // Wipe historical tracking flags
 
-      // Define your separate horizontal rows
       const rowsConfig = [
         { title: 'Popular Releases', endpoint: 'movie/popular' },
         { title: 'Top Rated Masters', endpoint: 'movie/top_rated' },
@@ -131,11 +155,22 @@
       ];
 
       for (const row of rowsConfig) {
+        const rowId = 'row-' + Math.random().toString(36).substr(2, 9);
+        
+        // Initialize dynamic operational limits tracking for this unique row
+        rowPaginationTracker[rowId] = {
+          currentPage: 1,
+          isFetching: false,
+          totalResultPages: 1
+        };
+
         try {
           const response = await fetch(`${BASE_URL}/${row.endpoint}?api_key=${API_KEY}&language=en-US&page=1`);
           const data = await response.json();
+          
           if (data.results && data.results.length > 0) {
-            createRowUI(row.title, data.results);
+            rowPaginationTracker[rowId].totalResultPages = data.total_pages;
+            createRowUI(rowId, row.title, row.endpoint, data.results);
           }
         } catch (err) {
           console.error(`Fault loading shelf row: ${row.title}`, err);
@@ -143,10 +178,8 @@
       }
     }
 
-    // Inject horizontal UI shelf elements cleanly into view DOM
-    function createRowUI(title, movies) {
-      const rowId = 'row-' + Math.random().toString(36).substr(2, 9);
-      
+    // Inject horizontal UI shelf elements along with infinite scroll trigger anchor
+    function createRowUI(rowId, title, endpoint, movies) {
       let cardsHtml = '';
       movies.forEach(movie => {
         cardsHtml += compileMovieCard(movie);
@@ -155,20 +188,69 @@
       const shelfHtml = `
         <section class="space-y-3 relative group">
           <h3 class="text-lg md:text-xl font-bold tracking-wide text-gray-200 group-hover:text-white transition">${title}</h3>
-          
-          <!-- Outer relative viewport window -->
           <div class="relative overflow-visible">
-            <!-- Row Track slider container -->
             <div id="${rowId}" class="flex space-x-4 overflow-x-scroll scroll-smooth scrollbar-hide py-3 px-1 snap-x">
               ${cardsHtml}
+              
+              <!-- INFINITE SCROLL HORIZONTAL ROW TRIGGER ANCHOR -->
+              <div id="anchor-${rowId}" data-row-id="${rowId}" data-endpoint="${endpoint}" class="flex-none w-[100px] flex items-center justify-center bg-gray-900/40 rounded-lg border border-dashed border-gray-800 snap-start">
+                <div class="text-center space-y-1 text-xs text-gray-500 font-medium">
+                  <span class="inline-block animate-spin text-red-500">⏳</span>
+                  <p class="px-1">More...</p>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
       `;
       dynamicShelves.innerHTML += shelfHtml;
+
+      // Bind freshly compiled tracking node target to observer loop immediately
+      setTimeout(() => {
+        const targetAnchor = document.getElementById(`anchor-${rowId}`);
+        if(targetAnchor) trackObserver.observe(targetAnchor);
+      }, 50);
     }
 
-    // Shared layout generation element
+    // Incremental pipeline fetch loop for handling distinct category segments
+    async function fetchNextRowPage(rowId, endpoint) {
+      const rowState = rowPaginationTracker[rowId];
+      if (rowState.currentPage >= rowState.totalResultPages) {
+        // Disconnect tracking loop if we hit remote storage borders
+        const anchorNode = document.getElementById(`anchor-${rowId}`);
+        if (anchorNode) trackObserver.unobserve(anchorNode);
+        anchorNode.remove();
+        return;
+      }
+
+      rowState.isFetching = true;
+      rowState.currentPage++;
+
+      try {
+        const response = await fetch(`${BASE_URL}/${endpoint}?api_key=${API_KEY}&language=en-US&page=${rowState.currentPage}`);
+        const data = await response.json();
+        
+        if (data.results && data.results.length > 0) {
+          const rowTrack = document.getElementById(rowId);
+          const anchorNode = document.getElementById(`anchor-${rowId}`);
+          
+          data.results.forEach(movie => {
+            // Build card element node from standard layout template framework string
+            const cardMarkup = compileMovieCard(movie);
+            
+            // Inject directly prior to the loading trigger block to preserve arrangement flow
+            anchorNode.insertAdjacentHTML('beforebegin', cardMarkup);
+          });
+        }
+      } catch (err) {
+        console.error(`Fault appending index stream segments onto channel row ${rowId}:`, err);
+      } finally {
+        rowState.isFetching = false;
+      }
+    }
+
+    // Shared movie visual node blueprint matrix compilation block
     function compileMovieCard(movie) {
       const poster = movie.poster_path ? `${POSTER_URL}${movie.poster_path}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1000';
       const year = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
@@ -183,7 +265,6 @@
           <div class="aspect-[2/3] w-full bg-gray-800 relative">
             <img src="${poster}" alt="${movie.title}" class="w-full h-full object-cover" loading="lazy">
             
-            <!-- Floating interaction panels overlay -->
             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition duration-200 flex items-start justify-end p-2">
               <button onclick="event.stopPropagation(); toggleWatchlist(${movie.id}, '${escapeHtml(movie.title)}', '${movie.poster_path}', '${movie.release_date}', ${movie.vote_average})" 
                       class="${btnClass} h-8 w-8 rounded-full border flex items-center justify-center font-bold text-base shadow-md transition-all transform hover:scale-110 z-30">
@@ -206,9 +287,8 @@
     function launchVideoPlayer(movieId) {
       videoModal.classList.remove('hidden');
       videoModal.classList.add('flex');
-      document.body.classList.add('overflow-hidden'); // Lock scroll context
+      document.body.classList.add('overflow-hidden');
 
-      // Low-Code Video Hook - Using standard YouTube embed framework for TMDB trailer keys safely
       playerTarget.innerHTML = `
         <iframe class="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1" 
                 title="Video Player Preview" frameborder="0" 
@@ -220,10 +300,10 @@
       videoModal.classList.add('hidden');
       videoModal.classList.remove('flex');
       document.body.classList.remove('overflow-hidden');
-      playerTarget.innerHTML = ''; // Safely tear down media player thread
+      playerTarget.innerHTML = '';
     }
 
-    // Dynamic Search Framework Injection 
+    // Dynamic Search Infrastructure Logic
     function setupSearch() {
       let typingTimer;
       searchInput.addEventListener('input', () => {
@@ -279,7 +359,6 @@
       localStorage.setItem('movieclub_watchlist', JSON.stringify(watchlist));
       updateWatchlistBadge();
 
-      // Live redraw context checks
       if (mode === 'watchlist') {
         displayWatchlist();
       } else if (mode === 'home') {
