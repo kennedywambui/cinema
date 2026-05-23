@@ -17,7 +17,7 @@ header {
   position: fixed;
   width: 100%;
   padding: 15px 20px;
-  background: rgba(0,0,0,0.8);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
   display: flex;
   justify-content: space-between;
   z-index: 100;
@@ -45,9 +45,23 @@ select, input {
 .hero {
   height: 80vh;
   background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   padding: 50px;
+}
+
+.hero h1 {
+  font-size: 50px;
+}
+
+.hero button {
+  padding: 10px 20px;
+  border: none;
+  margin-top: 10px;
+  cursor: pointer;
+  background: white;
+  color: black;
 }
 
 /* ROW */
@@ -60,11 +74,24 @@ select, input {
   margin-bottom: 10px;
 }
 
+/* WRAPPER FOR ARROWS */
+.row-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .row-posters {
   display: flex;
   overflow-x: scroll;
+  scroll-behavior: smooth;
 }
 
+.row-posters::-webkit-scrollbar {
+  display: none;
+}
+
+/* POSTERS */
 .poster-container {
   position: relative;
   margin-right: 10px;
@@ -79,7 +106,7 @@ select, input {
   transform: scale(1.3);
 }
 
-/* TOP 10 STYLE */
+/* TOP 10 NUMBERS */
 .rank {
   position: absolute;
   left: -10px;
@@ -89,7 +116,7 @@ select, input {
   color: rgba(255,255,255,0.2);
 }
 
-/* HOVER */
+/* HOVER INFO */
 .hover-info {
   position: absolute;
   bottom: 0;
@@ -97,10 +124,45 @@ select, input {
   width: 100%;
   opacity: 0;
   transition: 0.3s;
+  padding: 10px;
 }
 
 .poster-container:hover .hover-info {
   opacity: 1;
+}
+
+.hover-info button {
+  background: white;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+}
+
+/* ARROWS */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 40px;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: 0.3s;
+  z-index: 5;
+}
+
+.row-wrapper:hover .arrow {
+  opacity: 1;
+}
+
+.arrow.left {
+  left: 0;
+}
+
+.arrow.right {
+  right: 0;
 }
 
 /* MODAL */
@@ -152,6 +214,7 @@ document.getElementById("type").addEventListener("change", (e)=>{
   loadAll();
 });
 
+/* HERO */
 async function loadHero() {
   const res = await fetch(`${BASE}/trending/${type}/day?api_key=${API_KEY}`);
   const data = await res.json();
@@ -162,11 +225,11 @@ async function loadHero() {
 
   document.getElementById("hero").innerHTML = `
     <h1>${m.title || m.name}</h1>
-    <button onclick="playTrailer(${m.id})">Play</button>
+    <button onclick="playTrailer(${m.id})">▶ Play</button>
   `;
 }
 
-// ROW BUILDER
+/* CREATE ROW */
 async function createRow(title, url, isTop10=false) {
   const res = await fetch(url);
   const data = await res.json();
@@ -174,22 +237,30 @@ async function createRow(title, url, isTop10=false) {
   return `
     <div class="row">
       <h2>${title}</h2>
-      <div class="row-posters">
-        ${data.results.slice(0,10).map((m,i)=>`
-          <div class="poster-container">
-            ${isTop10 ? `<div class="rank">${i+1}</div>` : ""}
-            <img class="poster" src="https://image.tmdb.org/t/p/w300${m.poster_path}">
-            <div class="hover-info">
-              <p>${m.title || m.name}</p>
-              <button onclick="playTrailer(${m.id})">▶</button>
+
+      <div class="row-wrapper">
+        <div class="arrow left" onclick="scrollRow(this,-1)">❮</div>
+
+        <div class="row-posters">
+          ${data.results.slice(0,10).map((m,i)=>`
+            <div class="poster-container">
+              ${isTop10 ? `<div class="rank">${i+1}</div>` : ""}
+              <img class="poster" src="https://image.tmdb.org/t/p/w300${m.poster_path}">
+              <div class="hover-info">
+                <p>${m.title || m.name}</p>
+                <button onclick="playTrailer(${m.id})">▶</button>
+              </div>
             </div>
-          </div>
-        `).join("")}
+          `).join("")}
+        </div>
+
+        <div class="arrow right" onclick="scrollRow(this,1)">❯</div>
       </div>
     </div>
   `;
 }
 
+/* LOAD ROWS */
 async function loadRows() {
   const rows = document.getElementById("rows");
 
@@ -217,12 +288,16 @@ async function loadRows() {
   rows.innerHTML = top10 + trending + topRated + comedy;
 }
 
-async function loadAll() {
-  await loadHero();
-  await loadRows();
+/* SCROLL */
+function scrollRow(el, direction) {
+  const container = el.parentElement.querySelector(".row-posters");
+  container.scrollBy({
+    left: direction * 600,
+    behavior: "smooth"
+  });
 }
 
-// TRAILER
+/* TRAILER */
 async function playTrailer(id) {
   const res = await fetch(`${BASE}/${type}/${id}/videos?api_key=${API_KEY}`);
   const data = await res.json();
@@ -240,9 +315,10 @@ function closeModal() {
   document.getElementById("player").src = "";
 }
 
-// SEARCH
+/* SEARCH */
 document.getElementById("search").addEventListener("input", async e=>{
   const q = e.target.value;
+
   if (!q) return loadRows();
 
   const res = await fetch(`${BASE}/search/${type}?api_key=${API_KEY}&query=${q}`);
@@ -266,7 +342,12 @@ document.getElementById("search").addEventListener("input", async e=>{
   `;
 });
 
-// INIT
+/* INIT */
+async function loadAll() {
+  await loadHero();
+  await loadRows();
+}
+
 loadAll();
 </script>
 
