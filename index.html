@@ -22,6 +22,7 @@ transition:0.3s;
 background:rgba(0,0,0,0.6);
 border:none;padding:10px 15px;
 border-radius:20px;color:white;
+outline:none;
 }
 
 /* HERO */
@@ -42,18 +43,35 @@ background:linear-gradient(to top,#141414,transparent);
 .hero p{color:#ddd;margin:15px 0;}
 
 /* ROW */
-.row{margin-top:-80px;padding-left:40px;margin-bottom:30px;}
-.row h2{margin-bottom:10px;}
+.row{
+margin-top:40px;
+padding:0 40px;
+margin-bottom:50px;
+}
+.row h2{
+font-size:26px;
+margin-bottom:15px;
+font-weight:600;
+}
+.row::before{
+content:"";
+display:block;
+height:1px;
+background:rgba(255,255,255,0.1);
+margin-bottom:20px;
+}
 
 /* ROW CONTAINER */
 .row-container{position:relative;}
 
+/* SCROLL */
 .row-posters{
 display:flex;
-gap:12px;
+gap:14px;
 overflow-x:auto;
 scroll-behavior:smooth;
 padding:20px 0;
+scroll-snap-type:x mandatory;
 }
 .row-posters::-webkit-scrollbar{display:none;}
 
@@ -66,6 +84,7 @@ cursor:pointer;
 transition:0.3s;
 flex-shrink:0;
 position:relative;
+scroll-snap-align:start;
 }
 .poster-landscape img{
 width:100%;height:100%;object-fit:cover;
@@ -84,6 +103,7 @@ cursor:pointer;
 transition:0.3s;
 flex-shrink:0;
 position:relative;
+scroll-snap-align:start;
 }
 .poster-portrait img{
 width:100%;height:100%;object-fit:cover;
@@ -114,23 +134,23 @@ position:absolute;
 top:50%;
 transform:translateY(-50%);
 font-size:40px;
-background:rgba(0,0,0,0.5);
-padding:10px;
+background:rgba(0,0,0,0.7);
+padding:12px;
 cursor:pointer;
 z-index:20;
-display:none;
+border-radius:50%;
+transition:0.3s;
 }
-.row-container:hover .arrow{display:block;}
-.left{left:0;}
-.right{right:0;}
+.left{left:10px;}
+.right{right:10px;}
+.arrow:hover{background:#e50914;}
 
-/* MOBILE */
 @media(max-width:768px){
 .hero{height:70vh;padding:20px;}
 .hero h1{font-size:30px;}
 .poster-landscape{width:180px;height:110px;}
 .poster-portrait{width:120px;height:180px;}
-.arrow{display:none!important;}
+.arrow{display:none;}
 }
 </style>
 </head>
@@ -152,7 +172,7 @@ display:none;
 <!-- ROWS -->
 
 <div class="row">
-<h2>Trending Now</h2>
+<h2>🔥 Trending Now</h2>
 <div class="row-container">
 <div class="arrow left" onclick="scrollRow('trending',-1)">‹</div>
 <div class="arrow right" onclick="scrollRow('trending',1)">›</div>
@@ -161,7 +181,7 @@ display:none;
 </div>
 
 <div class="row">
-<h2>Top Rated</h2>
+<h2>⭐ Top Rated</h2>
 <div class="row-container">
 <div class="arrow left" onclick="scrollRow('top',-1)">‹</div>
 <div class="arrow right" onclick="scrollRow('top',1)">›</div>
@@ -170,7 +190,7 @@ display:none;
 </div>
 
 <div class="row">
-<h2>Action Movies</h2>
+<h2>💥 Action Movies</h2>
 <div class="row-container">
 <div class="arrow left" onclick="scrollRow('action',-1)">‹</div>
 <div class="arrow right" onclick="scrollRow('action',1)">›</div>
@@ -179,7 +199,7 @@ display:none;
 </div>
 
 <div class="row">
-<h2>TV Shows</h2>
+<h2>📺 TV Shows</h2>
 <div class="row-container">
 <div class="arrow left" onclick="scrollRow('tv',-1)">‹</div>
 <div class="arrow right" onclick="scrollRow('tv',1)">›</div>
@@ -193,9 +213,9 @@ const API_KEY="1d3ae144acfb6bfcb25f70361cedcf29";
 const API="https://api.themoviedb.org/3";
 const IMG="https://image.tmdb.org/t/p/original";
 
-/* NAV SCROLL */
+/* NAV */
 window.addEventListener("scroll",()=>{
-document.getElementById("nav").classList.toggle("scrolled",window.scrollY>50);
+nav.classList.toggle("scrolled",window.scrollY>50);
 });
 
 /* HERO */
@@ -204,12 +224,12 @@ const res=await fetch(`${API}/trending/movie/week?api_key=${API_KEY}`);
 const data=await res.json();
 const m=data.results[Math.floor(Math.random()*data.results.length)];
 
-document.getElementById("hero").style.backgroundImage=`url(${IMG+m.backdrop_path})`;
-document.getElementById("hero-title").innerText=m.title;
-document.getElementById("hero-desc").innerText=m.overview;
+hero.style.backgroundImage=`url(${IMG+m.backdrop_path})`;
+hero-title.innerText=m.title;
+hero-desc.innerText=m.overview;
 }
 
-/* FETCH ROW */
+/* FETCH */
 async function fetchRow(url,container,type,style){
 const res=await fetch(url);
 const data=await res.json();
@@ -243,14 +263,13 @@ document.getElementById(id).scrollBy({left:dir*500,behavior:"smooth"});
 }
 
 /* SEARCH */
-document.getElementById("search").addEventListener("keyup",async(e)=>{
+search.addEventListener("keyup",async(e)=>{
 const q=e.target.value;
 if(q.length<2)return;
 
 const res=await fetch(`${API}/search/multi?api_key=${API_KEY}&query=${q}`);
 const data=await res.json();
 
-const trending=document.getElementById("trending");
 trending.innerHTML="";
 
 data.results.forEach(item=>{
