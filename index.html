@@ -1,66 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
 <title>KENFLIX</title>
 
-<link rel="preconnect" href="https://image.tmdb.org">
-
 <style>
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 }
 
 body{
 background:#111;
-color:white;
+color:#fff;
 overflow-x:hidden;
 }
+
+/* HEADER */
 
 header{
 position:fixed;
 top:0;
 width:100%;
-padding:15px 30px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+padding:15px 30px;
 background:rgba(0,0,0,0.85);
 z-index:1000;
 }
 
 .logo{
-font-size:30px;
+font-size:32px;
 font-weight:bold;
-color:red;
+color:#e50914;
 }
 
 .search{
 padding:10px;
 width:250px;
 border:none;
-border-radius:5px;
 outline:none;
+border-radius:5px;
 background:#222;
 color:white;
 }
 
+/* BANNER */
+
 .banner{
-height:70vh;
+height:75vh;
 background-size:cover;
 background-position:center;
 display:flex;
 align-items:flex-end;
 padding:40px;
-margin-bottom:20px;
 }
 
 .banner-content{
-max-width:500px;
+max-width:550px;
 }
 
 .banner h1{
@@ -69,13 +72,15 @@ margin-bottom:10px;
 }
 
 .banner p{
-color:#ddd;
 line-height:1.5;
+color:#ddd;
 }
 
+/* ROWS */
+
 .row{
-margin-left:20px;
-margin-bottom:30px;
+margin-top:20px;
+padding-left:20px;
 }
 
 .row h2{
@@ -102,8 +107,10 @@ transition:0.3s;
 }
 
 .poster:hover{
-transform:scale(1.1);
+transform:scale(1.12);
 }
+
+/* MODAL */
 
 .modal{
 position:fixed;
@@ -115,7 +122,7 @@ background:rgba(0,0,0,0.95);
 display:none;
 justify-content:center;
 align-items:center;
-z-index:2000;
+z-index:5000;
 }
 
 .modal-content{
@@ -124,25 +131,45 @@ max-width:1000px;
 position:relative;
 }
 
-iframe{
-width:100%;
-height:550px;
-border:none;
-border-radius:10px;
-}
-
 .close{
 position:absolute;
-top:-40px;
+top:-45px;
 right:0;
 font-size:40px;
 cursor:pointer;
 }
 
+iframe{
+width:100%;
+height:550px;
+border:none;
+border-radius:10px;
+background:black;
+}
+
+.episode-controls{
+margin-top:15px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.episode-controls button{
+padding:10px 15px;
+border:none;
+background:#e50914;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+
+/* MOBILE */
+
 @media(max-width:768px){
 
 .banner{
-height:50vh;
+height:60vh;
+padding:20px;
 }
 
 .banner h1{
@@ -160,66 +187,110 @@ height:250px;
 .search{
 width:150px;
 }
+
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
+
 <div class="logo">KENFLIX</div>
-<input type="text" class="search" id="search" placeholder="Search movies...">
+
+<input
+type="text"
+class="search"
+id="search"
+placeholder="Search..."
+>
+
 </header>
 
 <div class="banner" id="banner">
+
 <div class="banner-content">
+
 <h1 id="banner-title">Loading...</h1>
+
 <p id="banner-desc"></p>
+
 </div>
+
 </div>
 
 <div class="row">
+
 <h2>Trending Movies</h2>
-<div class="row-posters" id="trending"></div>
+
+<div class="row-posters" id="movies"></div>
+
 </div>
 
 <div class="row">
-<h2>TV Series</h2>
-<div class="row-posters" id="tv"></div>
+
+<h2>Popular TV Shows</h2>
+
+<div class="row-posters" id="tvshows"></div>
+
 </div>
+
+<!-- PLAYER MODAL -->
 
 <div class="modal" id="modal">
+
 <div class="modal-content">
-<span class="close" id="close">&times;</span>
-<iframe id="player" allowfullscreen allow="autoplay"></iframe>
+
+<div class="close" id="close">&times;</div>
+
+<iframe
+id="player"
+allowfullscreen
+allow="autoplay"
+></iframe>
+
+<div
+class="episode-controls"
+id="episodes"
+></div>
+
 </div>
+
 </div>
 
 <script>
 
-const TMDB_API = "https://api.themoviedb.org/3";
-const TMDB_KEY = "1d3ae144acfb6bfcb25f70361cedcf29";
+const TMDB_KEY =
+"1d3ae144acfb6bfcb25f70361cedcf29";
 
-const IMG = "https://image.tmdb.org/t/p/original";
+const IMG =
+"https://image.tmdb.org/t/p/original";
 
-const trendingEl = document.getElementById("trending");
-const tvEl = document.getElementById("tv");
+const API =
+"https://api.themoviedb.org/3";
 
-async function fetchMovies(url, container, type){
+/* LOAD MOVIES */
+
+async function loadContent(url, container, type){
 
 const res = await fetch(url);
+
 const data = await res.json();
 
 container.innerHTML = "";
 
-data.results.forEach(movie => {
+data.results.forEach(item => {
+
+if(!item.poster_path) return;
 
 const img = document.createElement("img");
 
-img.src = IMG + movie.poster_path;
+img.src = IMG + item.poster_path;
+
 img.classList.add("poster");
 
-img.onclick = () => openPlayer(movie.id, type);
+img.onclick = () => openPlayer(item, type);
 
 container.appendChild(img);
 
@@ -227,38 +298,124 @@ container.appendChild(img);
 
 }
 
-function openPlayer(id, type){
+/* OPEN PLAYER */
 
-document.getElementById("modal").style.display = "flex";
+function openPlayer(item, type){
 
-/* STREAM PLAYER */
+const modal =
+document.getElementById("modal");
 
-if(type === "tv"){
+const player =
+document.getElementById("player");
 
-document.getElementById("player").src =
-`https://movie.codespecters.com/embed/tv/${id}`;
+const episodes =
+document.getElementById("episodes");
 
-}else{
+modal.style.display = "flex";
 
-document.getElementById("player").src =
-`https://movie.codespecters.com/embed/movie/${id}`;
+episodes.innerHTML = "";
+
+if(type === "movie"){
+
+/* CODESPECTERS EMBED */
+
+player.src =
+`https://movie.codespecters.com/embed/movie/${item.id}`;
 
 }
 
-}
+/* TV */
 
-document.getElementById("close").onclick = () => {
+else{
 
-document.getElementById("modal").style.display = "none";
+player.src =
+`https://movie.codespecters.com/embed/tv/${item.id}/1/1`;
 
-document.getElementById("player").src = "";
+for(let ep = 1; ep <= 12; ep++){
+
+const btn =
+document.createElement("button");
+
+btn.innerText = "Episode " + ep;
+
+btn.onclick = () => {
+
+player.src =
+`https://movie.codespecters.com/embed/tv/${item.id}/1/${ep}`;
 
 };
 
-async function bannerMovie(){
+episodes.appendChild(btn);
+
+}
+
+}
+
+}
+
+/* CLOSE */
+
+document.getElementById("close")
+.onclick = () => {
+
+document.getElementById("modal")
+.style.display = "none";
+
+document.getElementById("player")
+.src = "";
+
+};
+
+/* SEARCH */
+
+document.getElementById("search")
+.addEventListener("keyup", async(e)=>{
+
+const query = e.target.value;
+
+if(query.length < 2) return;
 
 const res = await fetch(
-`${TMDB_API}/trending/movie/week?api_key=${TMDB_KEY}`
+`${API}/search/multi?api_key=${TMDB_KEY}&query=${query}`
+);
+
+const data = await res.json();
+
+const movies =
+document.getElementById("movies");
+
+movies.innerHTML = "";
+
+data.results.forEach(item => {
+
+if(!item.poster_path) return;
+
+const img =
+document.createElement("img");
+
+img.src = IMG + item.poster_path;
+
+img.classList.add("poster");
+
+img.onclick = ()=>openPlayer(
+item,
+item.media_type === "tv"
+? "tv"
+: "movie"
+);
+
+movies.appendChild(img);
+
+});
+
+});
+
+/* BANNER */
+
+async function banner(){
+
+const res = await fetch(
+`${API}/trending/movie/week?api_key=${TMDB_KEY}`
 );
 
 const data = await res.json();
@@ -266,63 +423,32 @@ const data = await res.json();
 const movie =
 data.results[Math.floor(Math.random()*data.results.length)];
 
-document.getElementById("banner").style.backgroundImage =
-`linear-gradient(to top, #111, transparent), url(${IMG + movie.backdrop_path})`;
+document.getElementById("banner")
+.style.backgroundImage =
+`linear-gradient(to top,#111,transparent),
+url(${IMG + movie.backdrop_path})`;
 
-document.getElementById("banner-title").innerText =
-movie.title;
+document.getElementById("banner-title")
+.innerText = movie.title;
 
-document.getElementById("banner-desc").innerText =
-movie.overview;
+document.getElementById("banner-desc")
+.innerText = movie.overview;
 
 }
 
-document.getElementById("search").addEventListener("keyup", async(e)=>{
+/* LOAD */
 
-const query = e.target.value;
+banner();
 
-if(query.length < 2) return;
-
-const res = await fetch(
-`${TMDB_API}/search/multi?api_key=${TMDB_KEY}&query=${query}`
-);
-
-const data = await res.json();
-
-trendingEl.innerHTML = "";
-
-data.results.forEach(movie=>{
-
-if(!movie.poster_path) return;
-
-const img = document.createElement("img");
-
-img.src = IMG + movie.poster_path;
-
-img.classList.add("poster");
-
-img.onclick = ()=> openPlayer(
-movie.id,
-movie.media_type === "tv" ? "tv" : "movie"
-);
-
-trendingEl.appendChild(img);
-
-});
-
-});
-
-bannerMovie();
-
-fetchMovies(
-`${TMDB_API}/trending/movie/week?api_key=${TMDB_KEY}`,
-trendingEl,
+loadContent(
+`${API}/trending/movie/week?api_key=${TMDB_KEY}`,
+document.getElementById("movies"),
 "movie"
 );
 
-fetchMovies(
-`${TMDB_API}/tv/popular?api_key=${TMDB_KEY}`,
-tvEl,
+loadContent(
+`${API}/tv/popular?api_key=${TMDB_KEY}`,
+document.getElementById("tvshows"),
 "tv"
 );
 
