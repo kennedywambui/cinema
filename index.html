@@ -68,6 +68,32 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
 }
 .btn-trial:hover{background:rgba(229,9,20,.25);border-color:var(--red);}
 
+/* ─── TRIAL PROMO BANNER ─── */
+.trial-banner {
+  background: linear-gradient(90deg, #141414 0%, #290409 50%, #141414 100%);
+  border-bottom: 1px solid rgba(229, 9, 20, 0.25);
+  padding: 16px var(--pad);
+  margin-top: 72px; /* Smooth spacing immediately beneath fixed menu bars */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  z-index: 900;
+}
+.banner-text h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--red);
+  margin-bottom: 3px;
+}
+.banner-text p {
+  font-size: 13px;
+  color: #ccc;
+  line-height: 1.4;
+}
+
 /* ─── SEARCH RESULTS OVERLAY ─── */
 #search-results{
   position:fixed;top:60px;left:0;right:0;bottom:0;
@@ -80,9 +106,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
 
 /* ─── HERO (FIXED MOBILE CLIPPING) ─── */
 .hero{
-  height:100vh;
-  height:100dvh; /* Safely accounts for dynamic sizing parameters on modern devices */
-  min-height:560px;
+  height:calc(100vh - 72px);
+  height:calc(100dvh - 72px); /* Offsets beautifully to allow space for the promo line structural container */
+  min-height:500px;
   display:flex;align-items:flex-end;
   padding:0 var(--pad) 80px;
   background-size:cover;background-position:center top;
@@ -265,7 +291,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
 }
 .modal-close{
   width:36px;height:36px;border-radius:50%;
-  background:rgba(0,0,0,.8);border:1.5px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.2);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:#fff;
 }
@@ -329,10 +355,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ─── UNIFIED RESPONSIBILITY STRATEGY ─── */
+/* ─── UNIFIED RESPONSIVE STRATEGY ─── */
 @media(max-width:768px){
   #search{width:130px;}
   #search:focus{width:170px;}
+  .trial-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+    margin-top: 64px;
+    gap: 12px;
+  }
+  .hero {
+    height: calc(100vh - 120px);
+    height: calc(100dvh - 120px);
+  }
   .poster-landscape{width:200px;height:114px;}
   .poster-portrait{width:120px;height:180px;}
   .arrow{display:none;} /* Hides scroll buttons for native finger drag gestures */
@@ -395,6 +432,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
   </div>
 </nav>
 
+<div class="trial-banner" id="trial-promo-banner">
+  <div class="banner-text">
+    <h3>🚀 Unlock Unlimited Movies & Shows</h3>
+    <p>Your premium cinema lounge is waiting. Start your 7-day risk-free trial today.</p>
+  </div>
+  <button class="btn-trial" onclick="window.location.href='signup.html'">
+    Claim Free Trial
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</div>
+
 <div id="search-results">
   <h2 id="search-heading">Search Results</h2>
   <div class="search-grid" id="search-grid"></div>
@@ -447,32 +495,4 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
     </div>
     <div class="row-container">
       <button class="arrow left" onclick="scrollRow('watched-list',-1)" aria-label="Scroll left">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="arrow right" onclick="scrollRow('watched-list',1)" aria-label="Scroll right">
-        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-      <div class="row-posters" id="watched-list"></div>
-    </div>
-  </div>
-
-  <div class="row" id="row-trending">
-    <div class="row-header"><h2>🔥 Trending This Week</h2><button class="see-all" onclick="seeAll('','Trending','movie')">See All</button></div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('trending-list',-1)" aria-label="Scroll left">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="arrow right" onclick="scrollRow('trending-list',1)" aria-label="Scroll right">
-        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-      <div class="row-posters" id="trending-list"></div>
-    </div>
-  </div>
-
-  <div class="row" id="row-top">
-    <div class="row-header"><h2>⭐ Top Rated Movies</h2><button class="see-all" onclick="seeAll('','Top Rated','movie')">See All</button></div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('top-list',-1)" aria-label="Scroll left">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="arrow right" onclick="scrollRow('top-list',1)"
+        <svg viewBox="0 0 24 24"><polyl
