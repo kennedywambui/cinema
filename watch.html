@@ -25,7 +25,7 @@ body { background: #080808; color: var(--text); font-family: 'DM Sans', sans-ser
   padding: 16px 40px;
   background: rgba(8,8,8,.96);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,25..06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
   position: sticky; top: 0; z-index: 100;
 }
 .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--red); letter-spacing: 2px; text-decoration: none; }
@@ -71,6 +71,39 @@ body { background: #080808; color: var(--text); font-family: 'DM Sans', sans-ser
   animation: spin 0.9s linear infinite;
 }
 .player-loading p { font-size: 13px; color: var(--muted); }
+
+/* ── FULLSCREEN BUTTON ── */
+.fullscreen-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .2s, border-color .2s;
+  backdrop-filter: blur(4px);
+}
+.fullscreen-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+}
+.fullscreen-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
 
 /* ── TV SEASON SELECTOR ── */
 #season-bar {
@@ -282,7 +315,13 @@ footer a:hover { color: var(--red); }
         <div class="spinner"></div>
         <p id="player-loading-msg">Connecting…</p>
       </div>
+      
       <iframe id="player-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen" style="opacity:0;transition:opacity .4s;"></iframe>
+      
+      <button class="fullscreen-btn" onclick="togglePlayerFullscreen()">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m0 8v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3m0-8V5a2 2 0 0 0-2-2h-3"/></svg>
+        <span>Fullscreen</span>
+      </button>
     </div>
   </div>
 </div>
@@ -381,10 +420,11 @@ footer a:hover { color: var(--red); }
   let currentEpisode = 1;
   let mediaData      = null;
 
+  // Optimized high-speed video rendering cluster endpoint
   function buildSrc() {
     return mediaType === 'tv'
-      ? `https://multiembed.mov/?tmdb=1&video_id=${mediaId}&s=${currentSeason}&e=${currentEpisode}`
-      : `https://multiembed.mov/?tmdb=1&video_id=${mediaId}`;
+      ? `https://vidlink.pro/tv/${mediaId}/${currentSeason}/${currentEpisode}`
+      : `https://vidlink.pro/movie/${mediaId}`;
   }
 
   async function loadPlayer() {
@@ -415,6 +455,32 @@ footer a:hover { color: var(--red); }
       iframe.style.opacity = '1';
     }, 8000);
   }
+
+  // Cross-browser Fullscreen Toggle Logic
+  window.togglePlayerFullscreen = () => {
+    const wrap = document.getElementById('player-frame-wrap');
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+      if (wrap.requestFullscreen) {
+        wrap.requestFullscreen();
+      } else if (wrap.webkitRequestFullscreen) {
+        wrap.webkitRequestFullscreen();
+      } else if (wrap.mozRequestFullScreen) {
+        wrap.mozRequestFullScreen();
+      } else if (wrap.msRequestFullscreen) {
+        wrap.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  };
 
   async function loadTVSeasons(totalSeasons) {
     const seasonBar    = document.getElementById('season-bar');
