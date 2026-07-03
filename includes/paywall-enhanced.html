@@ -1,0 +1,168 @@
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<!-- SECURITY: Enhanced Paywall Logic -->
+<!-- Always verify subscription server-side before granting access -->
+<!-- ────────────────────────────────────────────────────────────────────── -->
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
+    authDomain: "cinema-nest-2bf23.firebaseapp.com",
+    projectId: "cinema-nest-2bf23",
+    storageBucket: "cinema-nest-2bf23.firebasestorage.app",
+    messagingSenderId: "358514764452",
+    appId: "1:358514764452:web:cinema-nest",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 🔒 Server-side subscription check endpoint
+  const VERIFY_ENDPOINT = '/api/verify-subscription'; // Point to your Worker/backend
+
+  // Paywall overlay — injected into DOM
+  const paywallHTML = `
+    <div id="browse-paywall" style="
+      display:none; position:fixed; inset:0; z-index:9999;
+      background:rgba(0,0,0,.92); backdrop-filter:blur(8px);
+      align-items:center; justify-content:center;
+    ">
+      <div style="
+        background:#141414; border:1px solid rgba(255,255,255,.1);
+        border-radius:16px; padding:48px 40px; max-width:420px;
+        width:90%; text-align:center;
+      ">
+        <div style="font-size:40px; margin-bottom:16px;">🎬</div>
+        <h2 id="browse-pw-title" style="
+          font-family:'Josefin Sans',sans-serif; font-size:32px;
+          letter-spacing:1px; margin-bottom:12px; color:#fff;
+        ">Subscription Required</h2>
+        <p id="browse-pw-msg" style="font-size:14px; color:#aaa; line-height:1.7; margin-bottom:28px;">
+          Subscribe to Cinema Nest to browse and watch unlimited movies and shows.
+        </p>
+        <a id="browse-pw-btn" href="pricing.html" style="
+          display:block; background:#e50914; color:#fff;
+          padding:14px 32px; border-radius:8px; font-size:15px;
+          font-weight:600; text-decoration:none; margin-bottom:12px;
+          transition:background .2s;
+        ">Subscribe Now – From $3/mo</a>
+        <a href="signup.html" style="
+          display:block; color:#aaa; font-size:13px;
+          text-decoration:none; padding:8px;
+        ">Sign in to your account →</a>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', paywallHTML);
+
+  function showBrowsePaywall(title, msg) {
+    if (title) document.getElementById('browse-pw-title').textContent = title;
+    if (msg) document.getElementById('browse-pw-msg').textContent = msg;
+    document.getElementById('browse-paywall').style.display = 'flex';
+  }
+
+  // 🔒 Server-side verification (fallback to localStorage if server is down)
+  async function verifySubscriptionWithServer(uid) {
+    try {
+      const response = await fetch(VERIFY_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid }),
+      });
+
+      if (!response.ok) {
+        console.warn('Subscription check failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error('Subscription verification error:', err);
+      return null;
+    }
+  }
+
+  // Safety timeout — show paywall if verification takes too long
+  let authTimeout;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (authTimeout) clearTimeout(authTimeout);
+
+    // Not logged in → require login
+    if (!user) {
+      showBrowsePaywall('Sign In to Watch', 'Create a free account or sign in, then subscribe to access Cinema Nest.');
+      return;
+    }
+
+    // Set timeout: if verification doesn't complete in 5 seconds, show paywall (secure default)
+    authTimeout = setTimeout(() => {
+      showBrowsePaywall('Verification Timeout', 'Unable to verify your subscription. Please refresh the page.');
+    }, 5000);
+
+    try {
+      // 🔒 PRIMARY: Server-side check (most secure)
+      const serverResult = await verifySubscriptionWithServer(user.uid);
+      clearTimeout(authTimeout);
+
+      if (serverResult) {
+        if (serverResult.valid) {
+          // ✅ Access granted
+          localStorage.setItem('cinemanest-paid', 'true');
+          return;
+        } else {
+          // ❌ Subscription invalid
+          const reason = serverResult.reason || 'Your subscription is not active';
+          showBrowsePaywall(
+            serverResult.type === 'paid_expired' ? 'Subscription Expired' : 'Trial Expired',
+            reason
+          );
+          return;
+        }
+      }
+
+      // 🟡 FALLBACK: If server check fails, verify with Firestore (slower but works)
+      console.warn('Server verification failed, falling back to Firestore check');
+      const snap = await getDoc(doc(db, 'users', user.uid));
+
+      if (!snap.exists()) {
+        showBrowsePaywall();
+        return;
+      }
+
+      const data = snap.data();
+
+      // Active paid subscription
+      if (data.plan === 'active' && data.subscriptionEnd) {
+        if (new Date(data.subscriptionEnd) > new Date()) {
+          localStorage.setItem('cinemanest-paid', 'true');
+          return; // ✅ Access granted
+        } else {
+          showBrowsePaywall('Subscription Expired', 'Your subscription has ended. Renew now to keep browsing.');
+          return;
+        }
+      }
+
+      // Free trial
+      if (data.trialEnd) {
+        if (new Date(data.trialEnd) > new Date()) {
+          return; // ✅ Trial still active
+        } else {
+          showBrowsePaywall('Trial Expired', 'Your 7-day trial has ended. Subscribe from just $3/month to continue.');
+          return;
+        }
+      }
+
+      // No plan
+      showBrowsePaywall();
+    } catch (err) {
+      clearTimeout(authTimeout);
+      console.error('Subscription check failed:', err);
+      // 🔴 On error, secure default is to show paywall (don't grant access)
+      showBrowsePaywall();
+    }
+  });
+</script>
