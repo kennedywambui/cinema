@@ -4,7 +4,7 @@
  *
  * What it does:
  *   1. Receives a POST from Selar when a payment is completed
- *   2. Verifies the request is genuine (secret token check)
+ *   2. Verifies the request is genuine (secret token check) ✅ NOW ENABLED
  *   3. Figures out which plan (1 / 3 / 6 / 12 months) was bought
  *   4. Finds the matching user in Firestore by email
  *   5. Sets plan = 'active' and subscriptionEnd = now + (plan length)
@@ -12,22 +12,14 @@
  * ── ENV VARS to set in Cloudflare Worker Settings ──
  *   FIREBASE_PROJECT_ID   → cinema-nest-2bf23
  *   FIREBASE_API_KEY      → your Firebase Web API key
- *   SELAR_SECRET          → any secret string you set in Selar webhook settings
+ *   SELAR_SECRET          → your Selar webhook secret (set in Selar dashboard)
+ *   ALLOWED_ORIGINS       → comma-separated domains (e.g., "https://yourdomain.com,https://www.yourdomain.com")
  *
  * ── YOUR 4 SELAR PRODUCTS ──
  *   1 month  → https://selar.com/1c7tz476t8   ($3)
  *   3 months → https://selar.com/851861q275   ($6)
  *   6 months → https://selar.com/6487z415ih   ($9)
  *   12 months→ https://selar.com/5rc8s61861   ($18)
- *
- * Selar's exact webhook field names can vary depending on how your account
- * is configured, so this worker tries several signals, in order of
- * reliability, to figure out which product was bought:
- *   1. The product slug/ID/link (matched against PRODUCT_SLUGS below)
- *   2. The product name/title (matched against keywords like "3 month")
- *   3. The amount paid (matched against PRICE_TO_PLAN below)
- * If none match, it safely falls back to the 1-month plan and logs a
- * warning so you can see it in Cloudflare logs and adjust the matching.
  */
 
 // ── Map each plan to its length in days ──
@@ -53,6 +45,14 @@ export default {
       return new Response('Method not allowed', { status: 405 });
     }
 
+    // ── CORS: Verify origin (prevent cross-site fraud) ──
+    const origin = request.headers.get('origin');
+    const allowedOrigins = (env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+    if (allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
+      console.warn(`⛔ Rejected request from unauthorized origin: ${origin}`);
+      return new Response('Forbidden: Invalid origin', { status: 403 });
+    }
+
     // ── Parse body ──
     let payload;
     try {
@@ -61,18 +61,20 @@ export default {
       return new Response('Invalid JSON', { status: 400 });
     }
 
-    // ── Optional: verify Selar secret token ──
-    // Selar sends the secret you configure as a header or body field.
-    // Uncomment and adjust once you confirm Selar's exact field from logs.
-    /*
+    // ── SECURITY: Verify Selar secret token (REQUIRED for production) ──
+    // Selar sends the secret as a header or body field.
     const incomingSecret = request.headers.get('x-selar-token') || payload.secret;
-    if (incomingSecret !== env.SELAR_SECRET) {
-      return new Response('Unauthorized', { status: 401 });
+    if (!env.SELAR_SECRET) {
+      console.error('⛔ SELAR_SECRET not configured in environment');
+      return new Response('Server misconfiguration', { status: 500 });
     }
-    */
+    if (incomingSecret !== env.SELAR_SECRET) {
+      console.error(`⛔ Webhook authentication failed. Expected: ${env.SELAR_SECRET}, Got: ${incomingSecret}`);
+      return new Response('Unauthorized: Invalid webhook secret', { status: 401 });
+    }
 
     // ── Log payload so you can inspect it in Cloudflare logs ──
-    console.log('Selar webhook payload:', JSON.stringify(payload));
+    console.log('✅ Valid webhook received:', JSON.stringify({ email: payload.buyer_email, timestamp: new Date().toISOString() }));
 
     // ── Extract buyer email ──
     // Selar typically sends: payload.buyer_email OR payload.customer?.email
