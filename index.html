@@ -120,7 +120,7 @@ body{background:var(--bg);color:var(--text);font-family:'Josefin Sans',sans-seri
 .hero-btns{display:flex;align-items:center;gap:12px;}
 .btn-play{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;text-decoration:none;padding:11px 24px;border-radius:6px;font-size:13px;font-weight:700;transition:transform .2s, background .2s;cursor:pointer;border:none;}
 .btn-play:hover{transform:scale(1.02);background:#e0e0e0;}
-.btn-play svg{width:14 height:14px;fill:currentColor;}
+.btn-play svg{width:14px; height:14px;fill:currentColor;}
 .btn-info{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.05);color:#fff;text-decoration:none;padding:11px 22px;border-radius:6px;font-size:13px;font-weight:600;transition:background .2s;cursor:pointer;}
 .btn-info:hover{background:rgba(255,255,255,.2);}
 
@@ -135,7 +135,7 @@ body{background:var(--bg);color:var(--text);font-family:'Josefin Sans',sans-seri
 /* ─── SHELF ROWS & SCROLL BUTTONS ─── */
 .main-content{padding:10px 40px 80px;display:flex;flex-direction:column;gap:36px;}
 .shelf-row{position:relative;}
-.shelf-header{display:flex;align-items:center;justify-content:between;margin-bottom:12px;}
+.shelf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .shelf-title{font-size:17px;font-weight:600;letter-spacing:0.5px;color:#fff;}
 .shelf-seeall{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;text-decoration:none;margin-left:auto;cursor:pointer;transition:color .2s;}
 .shelf-seeall:hover{color:var(--red);}
@@ -281,9 +281,6 @@ body{background:var(--bg);color:var(--text);font-family:'Josefin Sans',sans-seri
 .search-results-box{max-width:1000px;margin:40px auto 0;padding:0 24px 80px;height:calc(100vh - 240px);overflow-y:auto;}
 .search-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));gap:16px;}
 
-.skel-card{background:linear-gradient(90deg, #121212 25%, #1c1c1c 50%, #121212 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
 footer{border-top:1px solid rgba(255,255,255,.05);padding:40px;background:#060606;text-align:center;}
 footer p{font-size:12px;color:var(--muted);line-height:1.6;}
 
@@ -299,7 +296,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
 
 <div class="toast-container" id="toast-container"></div>
 
-<!-- DESIGN ACCURATE LEFT SIDEBAR -->
 <aside class="sidebar">
   <a href="index.html" class="sidebar-logo">
     <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
@@ -358,7 +354,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
 </aside>
 
 <div class="app-body">
-  <!-- HERO BILLBOARD -->
   <header class="hero" id="hero-banner">
     <div class="hero-inner" id="hero-content">
       <div class="hero-tag">Featured Spotlight</div>
@@ -372,7 +367,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
     </div>
   </header>
 
-  <!-- GENRES BAR -->
   <div class="genres-bar">
     <div class="genres-scroll" id="genres-pills-container">
       <span class="genre-pill active" onclick="filterGenre('all', this)">All Categories</span>
@@ -384,10 +378,8 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
     </div>
   </div>
 
-  <!-- CONTAINER SHELVES -->
   <main class="main-content" id="shelves-container">
     
-    <!-- Continue Watching -->
     <div class="shelf-row" id="shelf-continue" style="display:none;">
       <div class="shelf-header"><h2 class="shelf-title">Continue Watching</h2></div>
       <div class="shelf-scroll-wrap">
@@ -397,7 +389,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
       </div>
     </div>
 
-    <!-- Trending Right Now -->
     <div class="shelf-row" id="row-trending">
       <div class="shelf-header"><h2 class="shelf-title">Trending Right Now</h2></div>
       <div class="shelf-scroll-wrap">
@@ -407,7 +398,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
       </div>
     </div>
 
-    <!-- Studios & Platforms -->
     <div class="shelf-row" id="row-studios">
       <div class="shelf-header"><h2 class="shelf-title">Studios & Platforms</h2></div>
       <div class="shelf-scroll-wrap">
@@ -422,7 +412,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
       </div>
     </div>
 
-    <!-- Popular TV Shows -->
     <div class="shelf-row" id="row-tv">
       <div class="shelf-header"><h2 class="shelf-title">Popular TV Shows</h2></div>
       <div class="shelf-scroll-wrap">
@@ -432,7 +421,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
       </div>
     </div>
 
-    <!-- Action -->
     <div class="shelf-row" id="row-action">
       <div class="shelf-header"><h2 class="shelf-title">Action Blockbusters</h2></div>
       <div class="shelf-scroll-wrap">
@@ -448,7 +436,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
   </footer>
 </div>
 
-<!-- NEW INTERACTIVE PREVIEW POPUP MODAL -->
 <div class="preview-modal" id="preview-modal" onclick="closePreviewModal()">
   <div class="preview-box" onclick="event.stopPropagation()">
     <button class="preview-close" onclick="closePreviewModal()">✕</button>
@@ -466,7 +453,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
   </div>
 </div>
 
-<!-- TRAILER LIGHTBOX -->
 <div class="trailer-modal" id="trailer-screen" onclick="closeTrailer()">
   <div class="trailer-wrap" onclick="event.stopPropagation()">
     <button class="trailer-close" onclick="closeTrailer()">✕ Close</button>
@@ -474,7 +460,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
   </div>
 </div>
 
-<!-- SEARCH OVERLAY -->
 <div class="search-modal" id="search-modal">
   <div class="search-top">
     <input type="text" class="search-input" id="search-field" placeholder="Search titles..." autocomplete="off">
@@ -516,7 +501,7 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
     if(el) el.scrollLeft += amt;
   };
 
-  // OPEN DETAILS PREVIEW MODAL (Fixes Direct Movie Redirect)
+  // OPEN DETAILS PREVIEW MODAL
   window.openPreviewModal = (id, type, title, overview, rating, year, backdrop, poster) => {
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-overview').textContent = overview || "No details available.";
@@ -524,7 +509,7 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
     document.getElementById('modal-year').textContent = year;
     document.getElementById('modal-type').textContent = type === 'tv' ? 'TV Series' : 'Movie';
     
-    const bannerUrl = backdrop ? IMG_ORIG + backdrop : (poster ? IMG + poster : 'https://placehold.co/600x340/111/222?text=No+Cover');
+    const bannerUrl = backdrop ? IMG_ORIG + backdrop : (poster ? IMG + poster : 'https://placehold.co/600x340/111/222?text=Cinema+Nest');
     document.getElementById('modal-banner').style.backgroundImage = `url('${bannerUrl}')`;
 
     document.getElementById('modal-actions-bar').innerHTML = `
@@ -595,7 +580,6 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
         const year = (item.release_date || item.first_air_date || '').slice(0,4);
         const rating = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
         
-        // Escape characters for injection protection
         const cleanTitle = title.replace(/'/g, "\\'");
         const cleanOverview = (item.overview || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
 
@@ -661,7 +645,7 @@ footer p{font-size:12px;color:var(--muted);line-height:1.6;}
     } catch {}
   }
 
-  // FIXED CONTINUE WATCHING BANNER ENGINE (Handles snake_case and camelCase parameters gracefully)
+  // FIXED RENDER ENGINE: Gracefully mapping camelCase and snake_case API data types
   function renderHistoryShelf(items) {
     const row = document.getElementById('shelf-continue');
     const track = document.getElementById('continue-list');
