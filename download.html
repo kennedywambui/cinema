@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Cinema Nest</title>
+
+<!-- iOS: controls the icon, name, and fullscreen behavior when added to Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Get App">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- Android/Chrome: separate mini manifest so this page installs as its own shortcut, distinct from the main app -->
+<link rel="manifest" href="/manifest-download.json">
+<meta name="theme-color" content="#080808">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e50914;
+    --bg: #080808;
+    --card: #141414;
+    --text-dim: #b3b3b3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+  }
+
+  .logo span { color: var(--red); }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 480px;
+    padding: 40px 24px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .app-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 20px;
+    background: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 30px rgba(229,9,20,0.35);
+  }
+
+  .app-icon svg { width: 48px; height: 48px; fill: #fff; }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .download-btn {
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229,9,20,0.4);
+  }
+
+  .download-btn:active { transform: translateY(0); }
+
+  .meta {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  .steps {
+    width: 100%;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 40px;
+    text-align: left;
+  }
+
+  .steps h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    color: var(--red);
+  }
+
+  .steps ol {
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .steps li:last-child { margin-bottom: 0; }
+
+  .steps li::before {
+    content: counter(step);
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .note {
+    font-size: 12px;
+    color: #6b6b6b;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+
+  footer {
+    padding: 20px;
+    color: #555;
+    font-size: 12px;
+  }
+
+  .platform-toggle {
+    display: flex;
+    gap: 8px;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 32px;
+    width: 100%;
+  }
+
+  .platform-toggle button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .platform-toggle button.active {
+    background: var(--red);
+    color: #fff;
+  }
+
+  .ios-icon-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--card);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .ios-icon-badge svg { width: 18px; height: 18px; fill: var(--text-dim); }
+
+  .hidden { display: none; }
+
+  .install-banner {
+    width: 100%;
+    background: linear-gradient(135deg, #1a0507, #0d0d0d);
+    border-bottom: 1px solid rgba(229,9,20,0.3);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .install-banner-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .install-banner-icon svg { width: 18px; height: 18px; fill: #fff; }
+
+  .install-banner-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .install-banner-text strong { display: block; font-size: 14px; }
+  .install-banner-text span { color: var(--text-dim); }
+
+  .install-banner-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="install-banner hidden" id="install-banner">
+  <div class="install-banner-icon">
+    <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18v12.17l4.59-4.58L18 11l-6 6-6-6 1.41-1.41L12 14.17V2h0z"/></svg>
+  </div>
+  <div class="install-banner-text">
+    <strong>Get this on your Home Screen</strong>
+    <span id="install-banner-subtext">Quick access, no browser needed.</span>
+  </div>
+  <button class="install-banner-close" onclick="dismissBanner()">&times;</button>
+</div>
+
+<header>
+  <div class="logo">CINEMA <span>NEST</span></div>
+</header>
+
+<main>
+  <div class="app-icon">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </div>
+
+  <h1>Get the App</h1>
+  <p class="subtitle">Watch Cinema Nest on your device.<br>Faster, smoother, and always in your pocket.</p>
+
+  <div class="platform-toggle">
+    <button id="btn-android" onclick="showPlatform('android')">Android</button>
+    <button id="btn-ios" onclick="showPlatform('ios')">iPhone / iPad</button>
+  </div>
+
+  <!-- Android view -->
+  <div id="view-android">
+    <a href="/downloads/CinemaNest.apk" download class="download-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M5 20h14v-2H5v2zm7-18v12.17l4.59-4.58L18 11l-6 6-6-6 1.41-1.41L12 14.17V2h0z"/></svg>
+      Download for Android
+    </a>
+    <p class="meta">APK · 1.1 MB · Android 7.0+</p>
+
+    <div class="steps">
+      <h2>How to Install</h2>
+      <ol>
+        <li>Tap the download button above and wait for the file to finish downloading.</li>
+        <li>Open the downloaded file (CinemaNest.apk) from your notifications or downloads folder.</li>
+        <li>If prompted, tap <strong>Settings</strong> and allow installs from this source — this only needs to be done once.</li>
+        <li>Tap <strong>Install</strong>, then open Cinema Nest once it's done.</li>
+      </ol>
+    </div>
+
+    <p class="note">
+      Cinema Nest isn't listed on the Google Play Store, so Android will show a security notice when installing — this is normal for apps installed outside the Play Store. You can tap "Scan app" to have Google check it, or install directly if you trust the source.
+    </p>
+  </div>
+
+  <!-- iOS view -->
+  <div id="view-ios" class="hidden">
+    <div class="ios-icon-badge">
+      <svg viewBox="0 0 24 24"><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4z"/><path d="M18 9h-2v2h2v9H6v-9h2V9H6c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2z"/></svg>
+      Add to Home Screen
+    </div>
+    <p class="meta" style="margin-top:16px;">No App Store needed · Works right from Safari</p>
+
+    <div class="steps">
+      <h2>How to Install</h2>
+      <ol>
+        <li>Open <strong>cinemanest.2bd.net</strong> in <strong>Safari</strong> (this must be Safari — Chrome and other browsers on iOS don't support this).</li>
+        <li>Tap the <strong>Share</strong> icon at the bottom of the screen (the square with an arrow pointing up).</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+        <li>Tap <strong>Add</strong> in the top right corner.</li>
+        <li>Find the Cinema Nest icon on your home screen and tap it to open — it'll launch fullscreen, just like a regular app.</li>
+      </ol>
+    </div>
+
+    <p class="note">
+      Apple doesn't allow apps to be installed outside the App Store, so this "Add to Home Screen" method is the standard way to get an app-like experience on iPhone and iPad without going through App Store review.
+    </p>
+  </div>
+</main>
+
+<footer>© Cinema Nest</footer>
+
+<script>
+  function showPlatform(platform) {
+    document.getElementById('view-android').classList.toggle('hidden', platform !== 'android');
+    document.getElementById('view-ios').classList.toggle('hidden', platform !== 'ios');
+    document.getElementById('btn-android').classList.toggle('active', platform === 'android');
+    document.getElementById('btn-ios').classList.toggle('active', platform === 'ios');
+  }
+
+  // Auto-detect device on load
+  var isIOSDevice = false;
+  (function () {
+    var ua = navigator.userAgent || '';
+    isIOSDevice = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+    showPlatform(isIOSDevice ? 'ios' : 'android');
+  })();
+
+  // Install banner: only show if not already installed and not previously dismissed
+  function dismissBanner() {
+    document.getElementById('install-banner').classList.add('hidden');
+    try { localStorage.setItem('cn_install_banner_dismissed', '1'); } catch (e) {}
+  }
+
+  (function () {
+    var isStandalone = window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+
+    var dismissed = false;
+    try { dismissed = localStorage.getItem('cn_install_banner_dismissed') === '1'; } catch (e) {}
+
+    if (!isStandalone && !dismissed) {
+      document.getElementById('install-banner-subtext').textContent = isIOSDevice
+        ? 'Tap Share, then Add to Home Screen.'
+        : 'One tap install, no Play Store needed.';
+      document.getElementById('install-banner').classList.remove('hidden');
+    }
+  })();
+</script>
+
+</body>
+</html>
