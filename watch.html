@@ -77,31 +77,6 @@ body { background: #080808; color: var(--text); font-family: 'Josefin Sans', san
 }
 .player-loading p { font-size: 13px; color: var(--muted); }
 
-/* ── FULLSCREEN BUTTON ── */
-.fullscreen-btn {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 20;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,.7);
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 4px;
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: background .2s;
-}
-.fullscreen-btn:hover { background: rgba(0,0,0,.9); }
-.fullscreen-btn svg {
-  width: 18px; height: 18px;
-  fill: none; stroke: #fff; stroke-width: 2;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-
 /* ── NEXT EPISODE BUTTON ── */
 .next-episode-btn {
   position: absolute;
@@ -335,10 +310,6 @@ footer a:hover { color: var(--red); }
       </div>
       <iframe id="player-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen" style="opacity:0;transition:opacity .4s;"></iframe>
 
-      <button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen">
-        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-      </button>
-
       <button class="next-episode-btn" id="next-episode-btn" onclick="goToNextEpisode()" style="display:none;">
         <span>Next Episode</span>
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -442,7 +413,6 @@ footer a:hover { color: var(--red); }
   let mediaData         = null;
   let totalEpisodesInSeason = null;
 
-  // Vidbolt is the embed provider for playback.
   const SOURCES = [
     {
       name: 'Vidbolt',
@@ -455,21 +425,6 @@ footer a:hover { color: var(--red); }
     return SOURCES[0].build();
   }
 
-  window.toggleFullscreen = () => {
-    const frameWrap = document.getElementById('player-frame-wrap');
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      if (frameWrap.requestFullscreen) frameWrap.requestFullscreen();
-      else if (frameWrap.webkitRequestFullscreen) frameWrap.webkitRequestFullscreen();
-      else if (frameWrap.mozRequestFullScreen) frameWrap.mozRequestFullScreen();
-      else if (frameWrap.msRequestFullscreen) frameWrap.msRequestFullscreen();
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-      else if (document.msExitFullscreen) document.msExitFullscreen();
-    }
-  };
-
   async function loadPlayer() {
     const iframe  = document.getElementById('player-iframe');
     const loading = document.getElementById('player-loading');
@@ -478,7 +433,6 @@ footer a:hover { color: var(--red); }
     clearInterval(window._msgCycle);
     clearTimeout(window._playerLoadTimeout);
 
-    // No source configured — show a static message instead of a spinner.
     if (!SOURCES.length) {
       iframe.style.opacity = '0';
       iframe.removeAttribute('src');
@@ -519,13 +473,6 @@ footer a:hover { color: var(--red); }
     nextEpisodeTimer = null;
   }
 
-  // Schedules the "Next Episode" button to appear ~10 minutes before the
-  // current episode is expected to end. There's no way to read real
-  // playback position from the third-party embed (cross-origin iframe with
-  // no exposed player events), so this estimates based on episode runtime
-  // and wall-clock time since the episode started loading. It assumes
-  // continuous playback without pausing — a reasonable approximation, not
-  // a precise readout.
   function scheduleNextEpisodeButton() {
     clearNextEpisodeTimer();
     const btn = document.getElementById('next-episode-btn');
@@ -537,14 +484,12 @@ footer a:hover { color: var(--red); }
     const totalSeasons    = mediaData.number_of_seasons || 1;
     const hasNextInSeason = totalEpisodesInSeason && currentEpisode < totalEpisodesInSeason;
     const hasNextSeason   = currentSeason < totalSeasons;
-    if (!hasNextInSeason && !hasNextSeason) return; // nothing to advance to
+    if (!hasNextInSeason && !hasNextSeason) return;
 
     const epInfo = seasonEpisodes.find(e => e.episode_number === currentEpisode);
     let runtime = (epInfo && epInfo.runtime) ? epInfo.runtime
-      : (mediaData.episode_run_time && mediaData.episode_run_time[0]) || 42; // typical TV ep length fallback
+      : (mediaData.episode_run_time && mediaData.episode_run_time[0]) || 42;
 
-    // For very short episodes, "10 minutes before the end" doesn't make
-    // sense, so reveal it once roughly half the episode has played.
     const showAfterMinutes = runtime > 10 ? (runtime - 10) : runtime / 2;
 
     nextEpisodeTimer = setTimeout(() => {
