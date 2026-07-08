@@ -442,13 +442,13 @@ footer a:hover { color: var(--red); }
   let mediaData         = null;
   let totalEpisodesInSeason = null;
 
-  // EmbedMaster is the embed provider for playback.
+  // Vidbolt is the embed provider for playback.
   const SOURCES = [
     {
-      name: 'EmbedMaster',
+      name: 'Vidbolt',
       build: () => mediaType === 'tv'
-        ? `https://embedmaster.link/rd9hmlsvm8w19mb5/tv/${mediaId}/${currentSeason}/${currentEpisode}`
-        : `https://embedmaster.link/rd9hmlsvm8w19mb5/movie/${mediaId}`,
+        ? `https://vidbolt.xyz/tv/${mediaId}/${currentSeason}/${currentEpisode}`
+        : `https://vidbolt.xyz/movie/${mediaId}`,
     },
   ];
   function buildSrc() {
