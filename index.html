@@ -28,1588 +28,761 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Josefin Sans',sans-serif;overflow-x:hidden;}
 
-/* ─── NAV ─── */
-.nav{
-  position:fixed;top:0;width:100%;z-index:1000;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 48px;height:var(--nav-h);
-  transition:background .4s,backdrop-filter .4s,box-shadow .4s;
-}
-.nav.scrolled{
-  background:rgba(8,8,8,.96);
-  backdrop-filter:blur(20px);
-  box-shadow:0 1px 0 rgba(255,255,255,.05);
-}
-.logo{
-  font-family:'Josefin Sans',sans-serif;
-  font-size:19px;color:var(--red);letter-spacing:3px;
-  cursor:pointer;text-decoration:none;
-  display:flex;align-items:center;gap:10px;
-  transition:opacity .2s;
-}
-.logo:hover{opacity:.85;}
-.logo-icon{
-  width:26px;height:26px;
-  background:var(--red);border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.logo-icon svg{width:14px;height:14px;fill:#fff;}
-.nav-right{display:flex;align-items:center;gap:16px;}
+/* ─── TOAST ─── */
+.toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:rgba(20,20,20,.95);border:1px solid rgba(255,255,255,.08);color:#fff;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.5);backdrop-filter:blur(10px);transform:translateY(20px);opacity:0;transition:all .3s cubic-bezier(.175,.885,.32,1.275);display:flex;align-items:center;gap:8px;}
+.toast.show{transform:translateY(0);opacity:1;}
 
-/* Search */
-.search-wrap{position:relative;display:flex;align-items:center;}
-.search-icon-btn{
-  background:none;border:none;cursor:pointer;
-  color:var(--muted);padding:8px;
-  display:flex;align-items:center;justify-content:center;
-  transition:color .2s;
-}
-.search-icon-btn:hover{color:#fff;}
-.search-icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;}
-.search-expand{
-  position:absolute;right:0;top:50%;transform:translateY(-50%);
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  padding:9px 14px 9px 40px;border-radius:24px;
-  color:var(--text);width:0;font-size:14px;font-family:inherit;
-  transition:width .35s cubic-bezier(.4,0,.2,1),opacity .3s,border-color .2s;
-  outline:none;opacity:0;pointer-events:none;
-}
-.search-wrap.open .search-expand{
-  width:260px;opacity:1;pointer-events:all;
-  border-color:rgba(255,255,255,.2);
-}
-.search-expand::placeholder{color:var(--muted);}
-.search-wrap.open .search-icon-btn{position:absolute;left:10px;z-index:1;pointer-events:none;}
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:#0a0a0a;}
+::-webkit-scrollbar-thumb{background:#252525;border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:#353535;}
 
-.nav-btn{
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  color:var(--text);padding:8px 16px;border-radius:20px;
-  cursor:pointer;font-size:13px;font-family:inherit;
-  display:flex;align-items:center;gap:6px;
-  transition:background .2s,border-color .2s;
-  white-space:nowrap;
-}
-.nav-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.2);}
-.nav-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;}
+/* ─── TOP NAVIGATION ─── */
+.nav-wrap{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:linear-gradient(to bottom, rgba(8,8,8,.9) 0%, rgba(8,8,8,.7) 70%, transparent 100%);backdrop-filter:blur(12px);z-index:1000;border-bottom:1px solid rgba(255,255,255,.04);transition:background .3s, border-color .3s;}
+.nav-wrap.scrolled{background:#080808;border-bottom:1px solid rgba(255,255,255,.08);}
+.nav-inner{max-width:1400px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 40px;}
+.logo-box{display:flex;align-items:center;text-decoration:none;}
 
-.nav-cta{
-  background:var(--red);border:none;
-  color:#fff;padding:8px 20px;border-radius:20px;
-  cursor:pointer;font-size:13px;font-family:inherit;font-weight:600;
-  transition:background .2s,transform .15s;
-  white-space:nowrap;
-}
-.nav-cta:hover{background:var(--red-dark);transform:scale(1.03);}
+.nav-center{display:flex;align-items:center;gap:32px;}
+.nav-link{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;letter-spacing:0.5px;transition:color .2s;cursor:pointer;}
+.nav-link:hover, .nav-link.active{color:#fff;}
 
-/* Trial badge */
-#nav-trial-badge{display:none;align-items:center;gap:10px;}
-.trial-pill-nav{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(229,9,20,.1);border:1px solid rgba(229,9,20,.25);
-  color:var(--red);font-size:11px;font-weight:700;letter-spacing:1px;
-  text-transform:uppercase;padding:6px 12px;border-radius:20px;white-space:nowrap;
-}
-.trial-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;flex-shrink:0;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.nav-right{display:flex;align-items:center;gap:20px;}
+.search-trigger{background:none;border:none;color:#fff;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;opacity:.8;transition:opacity .2s;}
+.search-trigger:hover{opacity:1;}
+.search-trigger svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.5;}
 
-/* Expired state — urgent, high-contrast, attention-grabbing */
-.trial-pill-nav.expired{
-  background:rgba(229,9,20,.18);border:1px solid rgba(229,9,20,.6);
-  color:#ff5c63;animation:expired-glow 1.6s ease-in-out infinite;
-}
-.trial-dot.expired-dot{background:#ff3b3b;animation:pulse .9s infinite;}
-@keyframes expired-glow{
-  0%,100%{box-shadow:0 0 0 0 rgba(229,9,20,.35);}
-  50%{box-shadow:0 0 0 6px rgba(229,9,20,0);}
-}
+.profile-trigger{width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s;}
+.profile-trigger:hover{color:#fff;border-color:rgba(255,255,255,.25);}
+.profile-trigger svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;}
 
-.nav-pay-now{
-  background:var(--red);border:none;color:#fff;
-  padding:8px 16px;border-radius:20px;font-family:inherit;font-size:13px;
-  font-weight:600;cursor:pointer;transition:background .2s,transform .15s;
-  display:none;white-space:nowrap;
-}
-.nav-pay-now:hover{background:var(--red-dark);transform:scale(1.03);}
-.nav-pay-now.show{display:inline-block;}
-.nav-pay-now.expired{
-  background:#ff2d2d;animation:expired-btn-pulse 1.3s ease-in-out infinite;
-  box-shadow:0 0 0 0 rgba(255,45,45,.5);
-}
-.nav-pay-now.expired:hover{background:#e00000;transform:scale(1.05);}
-@keyframes expired-btn-pulse{
-  0%{box-shadow:0 0 0 0 rgba(255,45,45,.55);}
-  70%{box-shadow:0 0 0 9px rgba(255,45,45,0);}
-  100%{box-shadow:0 0 0 0 rgba(255,45,45,0);}
-}
-.nav-signout{
-  background:none;border:1px solid rgba(255,255,255,.12);color:var(--muted);
-  padding:6px 12px;border-radius:20px;font-family:inherit;font-size:12px;
-  cursor:pointer;transition:all .2s;
-}
-.nav-signout:hover{border-color:rgba(255,255,255,.3);color:#fff;}
+/* ─── FULLSCREEN SEARCH MODAL ─── */
+.search-modal{position:fixed;inset:0;background:rgba(8,8,8,.98);backdrop-filter:blur(16px);z-index:10000;display:none;opacity:0;transition:opacity .3s ease;}
+.search-modal.open{display:block;opacity:1;}
+.search-top{max-width:800px;margin:80px auto 0;padding:0 24px;display:flex;align-items:center;gap:16px;position:relative;}
+.search-input-wrap{flex:1;position:relative;}
+.search-input-wrap svg{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:2.5;}
+.search-input{width:100%;background:var(--surface);border:1px solid rgba(255,255,255,.08);border-radius:30px;padding:16px 24px 16px 56px;color:#fff;font-family:inherit;font-size:18px;outline:none;transition:border-color .2s, box-shadow .2s;}
+.search-input:focus{border-color:var(--red);box-shadow:0 0 0 4px var(--red-glow);}
+.search-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px;transition:color .2s;}
+.search-close:hover{color:#fff;}
+.search-results-box{max-width:1000px;margin:40px auto 0;padding:0 24px 80px;height:calc(100vh - 240px);overflow-y:auto;}
+.search-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));gap:16px;}
 
-/* ─── SEARCH OVERLAY ─── */
-#search-results{
-  position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;
-  background:rgba(8,8,8,.97);z-index:999;
-  display:none;overflow-y:auto;padding:40px 48px;
-}
-#search-results.active{display:block;}
-#search-heading{
-  font-family:'Josefin Sans',sans-serif;font-size:24px;letter-spacing:1.5px;
-  color:var(--muted);margin-bottom:24px;
-}
-.search-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:12px;
-}
+/* ─── HERO FEATURE BANNER ─── */
+.hero{position:relative;height:75vh;min-height:500px;max-height:800px;background-size:cover;background-position:center top;display:flex;align-items:flex-end;margin-bottom:20px;}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(to top, var(--bg) 0%, rgba(8,8,8,.4) 40%, rgba(8,8,8,.1) 70%, rgba(8,8,8,.5) 100%);}
+.hero::after{content:'';position:absolute;left:0;right:0;bottom:0;height:150px;background:linear-gradient(to top, var(--bg), transparent);z-index:2;}
+.hero-inner{position:relative;z-index:3;max-width:1400px;width:100%;margin:0 auto;padding:0 40px 60px;max-width:800px;margin-left:0;}
+.hero-tag{display:inline-flex;align-items:center;background:rgba(255,255,255,.1);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.12);padding:4px 12px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#fff;margin-bottom:16px;}
+.hero-title{font-size:clamp(32px, 5vw, 64px);font-weight:700;line-height:1.05;letter-spacing:-1px;margin-bottom:14px;text-shadow:0 2px 10px rgba(0,0,0,.5);}
+.hero-meta{display:flex;align-items:center;gap:14px;font-size:13px;color:#ccc;margin-bottom:18px;}
+.hero-rating{color:#fbbf24;font-weight:700;display:flex;align-items:center;gap:4px;}
+.hero-overview{font-size:15px;line-height:1.6;color:#bbb;margin-bottom:28px;text-shadow:0 1px 4px rgba(0,0,0,.4);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.hero-btns{display:flex;align-items:center;gap:12px;}
+.btn-play{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#000;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:700;transition:transform .2s, background .2s;}
+.btn-play:hover{transform:scale(1.03);background:#e0e0e0;}
+.btn-play svg{width:14px;height:14px;fill:currentColor;}
+.btn-info{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.05);color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:14px;font-weight:600;transition:background .2s;}
+.btn-info:hover{background:rgba(255,255,255,.2);}
+.btn-info svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.5;}
 
-/* ─── HERO ─── */
-.hero{
-  height:100vh;min-height:600px;
-  display:flex;align-items:flex-end;
-  padding:0 48px 80px;
-  background-size:cover;background-position:center top;
-  position:relative;
-  transition:background-image 1s ease;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:
-    linear-gradient(to right,rgba(8,8,8,.95) 30%,rgba(8,8,8,.3) 65%,transparent 85%),
-    linear-gradient(to top,rgba(8,8,8,1) 0%,rgba(8,8,8,.5) 30%,transparent 55%);
-}
-.hero-content{position:relative;max-width:580px;}
+/* ─── GENRE QUICK FILTER BAR ─── */
+.genres-bar{max-width:1400px;margin:0 auto;padding:10px 40px;}
+.genres-scroll{display:flex;align-items:center;gap:8px;overflow-x:auto;padding-bottom:8px;}
+.genres-scroll::-webkit-scrollbar{display:none;}
+.genre-pill{background:var(--surface);border:1px solid rgba(255,255,255,.06);color:var(--muted);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .2s;}
+.genre-pill:hover{color:#fff;border-color:rgba(255,255,255,.15);background:var(--surface2);}
+.genre-pill.active{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 4px 12px rgba(229,9,20,.2);}
 
-.hero-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:var(--red);margin-bottom:20px;
-  border:1px solid rgba(229,9,20,.4);
-  padding:5px 12px;border-radius:4px;
-  background:rgba(229,9,20,.08);
-}
-.hero-badge svg{width:10px;height:10px;fill:currentColor;}
+/* ─── MAIN CONTENT SHELF ROWS ─── */
+.main-content{max-width:1400px;margin:0 auto;padding:0 40px 80px;display:flex;flex-direction:column;gap:40px;}
+.shelf-row{position:relative;}
+.shelf-header{display:flex;align-items:center;justify-content:between;margin-bottom:14px;}
+.shelf-title{font-size:18px;font-weight:600;letter-spacing:0.5px;color:#fff;}
+.shelf-seeall{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;text-decoration:none;margin-left:auto;transition:color .2s;}
+.shelf-seeall:hover{color:var(--red);}
 
-.hero h1{
-  font-family:'Josefin Sans',sans-serif;
-  font-size:clamp(52px,8vw,100px);
-  line-height:.9;letter-spacing:1px;
-  margin-bottom:18px;
-  text-shadow:0 2px 20px rgba(0,0,0,.5);
-}
-.hero-meta{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:16px;font-size:13px;color:var(--muted);flex-wrap:wrap;
-}
-.hero-rating{
-  color:#fbbf24;font-weight:700;font-size:13px;
-  display:flex;align-items:center;gap:3px;
-}
-.hero-dot{width:3px;height:3px;border-radius:50%;background:var(--muted2);}
-.hero p{
-  font-size:15px;line-height:1.65;color:rgba(255,255,255,.7);
-  margin-bottom:28px;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-}
-.hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.shelf-scroll-wrap{position:relative;}
+.shelf-track{display:flex;gap:14px;overflow-x:auto;padding:4px 0 16px;scroll-snap-type:x mandatory;}
+.shelf-track::-webkit-scrollbar{display:none;}
 
-.btn-play{
-  background:#fff;color:#000;
-  border:none;padding:13px 28px;border-radius:6px;
-  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;gap:8px;
-  transition:background .2s,transform .1s;
-  letter-spacing:.2px;
-}
-.btn-play:hover{background:#e8e8e8;transform:scale(1.02);}
-.btn-play svg{width:16px;height:16px;fill:currentColor;flex-shrink:0;}
+/* ─── CARDS DESIGN (PORTRAIT) ─── */
+.card-portrait{flex:0 0 calc(100% / 7);min-width:150px;scroll-snap-align:start;position:relative;border-radius:var(--radius);overflow:hidden;background:var(--surface);aspect-ratio:2/3;cursor:pointer;transition:transform .3s cubic-bezier(.165,.84,.44,1), box-shadow .3s;text-decoration:none;color:inherit;border:1px solid rgba(255,255,255,.03);}
+.card-portrait img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+.card-portrait:hover{transform:translateY(-6px);box-shadow:0 12px 24px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.1);}
+.card-portrait:hover img{transform:scale(1.04);}
+.card-meta{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.4) 70%, transparent 100%);padding:24px 12px 10px;opacity:0;transition:opacity .2s ease;display:flex;flex-direction:column;justify-content:end;}
+.card-portrait:hover .card-meta{opacity:1;}
+.card-title{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.card-sub{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;}
+.card-rating{color:#fbbf24;font-weight:600;}
 
-.btn-info{
-  background:rgba(255,255,255,.12);color:#fff;
-  border:1px solid rgba(255,255,255,.15);
-  padding:13px 24px;border-radius:6px;
-  font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;gap:8px;
-  backdrop-filter:blur(4px);
-  transition:background .2s,border-color .2s;
-}
-.btn-info:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);}
-.btn-info svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+/* ─── CARDS DESIGN (LANDSCAPE) ─── */
+.card-landscape{flex:0 0 calc(100% / 4);min-width:240px;scroll-snap-align:start;position:relative;border-radius:var(--radius);overflow:hidden;background:var(--surface);aspect-ratio:16/9;cursor:pointer;transition:transform .3s cubic-bezier(.165,.84,.44,1), box-shadow .3s;text-decoration:none;color:inherit;border:1px solid rgba(255,255,255,.03);}
+.card-landscape img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+.card-landscape:hover{transform:translateY(-6px);box-shadow:0 12px 24px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.1);}
+.card-landscape:hover img{transform:scale(1.04);}
+.card-landscape .card-meta{opacity:1;background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.2) 60%, transparent 100%);padding:30px 14px 12px;}
+.card-landscape .card-title{font-size:14px;margin-bottom:3px;}
 
-/* ─── GENRE NAV ─── */
-.genre-nav{
-  display:flex;gap:6px;padding:20px 48px;
-  overflow-x:auto;scrollbar-width:none;
-  position:relative;z-index:1;
-}
-.genre-nav::-webkit-scrollbar{display:none;}
-.genre-pill{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  color:var(--muted);padding:7px 18px;border-radius:20px;
-  font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;
-  font-weight:500;letter-spacing:.3px;
-  transition:all .2s;
-}
-.genre-pill:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18);}
-.genre-pill.active{
-  background:var(--red);color:#fff;border-color:var(--red);
-  box-shadow:0 0 16px rgba(229,9,20,.35);
-}
-
-/* ─── ROWS ─── */
-.rows-wrap{padding:0 0 80px;transition:opacity .2s;}
-.row{margin-bottom:4px;}
-
-.row-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:28px 48px 12px;
-}
-.row-header h2{
-  font-family:'Josefin Sans',sans-serif;
-  font-size:20px;letter-spacing:1.5px;
-  display:flex;align-items:center;gap:10px;
-  color:#fff;
-}
-.row-emoji{font-size:16px;}
-.see-all{
-  font-size:11px;color:var(--red);cursor:pointer;
-  text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
-  background:none;border:none;font-family:inherit;
-  transition:opacity .2s;
-  display:flex;align-items:center;gap:4px;
-}
-.see-all:hover{opacity:.75;}
-.see-all svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;}
-
-.row-container{position:relative;}
-
-/* Fade edges on scroll rows */
-.row-container::before,
-.row-container::after{
-  content:'';position:absolute;top:0;bottom:0;z-index:8;
-  width:48px;pointer-events:none;
-  transition:opacity .3s;
-}
-.row-container::before{
-  left:0;
-  background:linear-gradient(to right,var(--bg),transparent);
-}
-.row-container::after{
-  right:0;
-  background:linear-gradient(to left,var(--bg),transparent);
-}
-
-.row-posters{
-  display:flex;gap:8px;
-  overflow-x:auto;scroll-behavior:smooth;
-  padding:8px 48px 24px;
-  scrollbar-width:none;
-}
-.row-posters::-webkit-scrollbar{display:none;}
-
-/* ─── ARROWS ─── */
-.arrow{
-  position:absolute;top:50%;transform:translateY(-50%);
-  width:40px;height:72px;
-  background:rgba(8,8,8,.9);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;z-index:10;
-  transition:background .2s,opacity .2s;
-  border:none;color:#fff;opacity:0;
-}
-.row-container:hover .arrow{opacity:1;}
-.arrow:hover{background:rgba(20,20,20,.98);}
-.arrow.left{left:0;border-radius:0 6px 6px 0;}
-.arrow.right{right:0;border-radius:6px 0 0 6px;}
-.arrow svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;}
-
-/* ─── CARDS ─── */
-.poster-landscape{
-  width:260px;height:148px;
-  border-radius:var(--radius);overflow:hidden;
-  cursor:pointer;flex-shrink:0;position:relative;
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
-  background:var(--surface2);
-}
-.poster-portrait{
-  width:150px;height:225px;
-  border-radius:var(--radius);overflow:hidden;
-  cursor:pointer;flex-shrink:0;position:relative;
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
-  background:var(--surface2);
-}
-.poster-landscape:hover,.poster-portrait:hover{
-  transform:scale(1.06) translateY(-4px);
-  box-shadow:0 16px 48px rgba(0,0,0,.8);
-  z-index:5;
-}
-.poster-landscape img,.poster-portrait img{
-  width:100%;height:100%;object-fit:cover;display:block;
-  transition:transform .4s;
-}
-.poster-landscape:hover img,.poster-portrait:hover img{transform:scale(1.04);}
-
-.card-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.4) 45%,transparent 70%);
-  opacity:0;transition:opacity .3s;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:10px;
-}
-.poster-landscape:hover .card-overlay,
-.poster-portrait:hover .card-overlay{opacity:1;}
-
-.card-title{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:3px;}
-.card-year{font-size:11px;color:rgba(255,255,255,.5);}
-
-.card-play-btn{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);
-  width:40px;height:40px;border-radius:50%;
-  background:rgba(229,9,20,.9);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity .25s,transform .25s;
-}
-.poster-landscape:hover .card-play-btn,
-.poster-portrait:hover .card-play-btn{opacity:1;transform:translate(-50%,-50%) scale(1);}
-.card-play-btn svg{width:14px;height:14px;fill:#fff;margin-left:2px;}
-
-.card-mylist{
-  position:absolute;top:8px;right:8px;
-  width:28px;height:28px;border-radius:50%;
-  background:rgba(0,0,0,.7);border:1.5px solid rgba(255,255,255,.35);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity .2s,background .2s,transform .2s;
-  cursor:pointer;
-}
-.poster-landscape:hover .card-mylist,
-.poster-portrait:hover .card-mylist{opacity:1;}
-.card-mylist:hover{background:var(--red);border-color:var(--red);transform:scale(1.1);}
-
-/* ── PERSISTENT CARD TITLE ── */
-.card-wrap{display:inline-flex;flex-direction:column;flex-shrink:0;cursor:pointer;}
-.card-wrap .poster-landscape,.card-wrap .poster-portrait{flex-shrink:0;}
-.card-label{
-  font-size:12px;font-weight:500;color:rgba(255,255,255,.85);
-  line-height:1.35;margin-top:6px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:100%;padding:0 2px;
-}
-.card-mylist svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.5;}
-
-/* ─── SKELETON ─── */
-.skeleton{
-  background:linear-gradient(90deg,var(--surface2) 25%,#252525 50%,var(--surface2) 75%);
-  background-size:200% 100%;
-  animation:shimmer 1.6s infinite;
-  border-radius:var(--radius);flex-shrink:0;
-}
+/* ─── SKELETON LOADING PLACEHOLDERS ─── */
+.skel-card{background:linear-gradient(90deg, #121212 25%, #1c1c1c 50%, #121212 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius);}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* ─── MODAL ─── */
-.modal-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,.8);
-  z-index:2000;display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .3s;
-  padding:20px;
-}
-.modal-backdrop.open{opacity:1;pointer-events:all;}
-.modal{
-  background:#161616;border-radius:14px;
-  width:100%;max-width:820px;max-height:90vh;
-  overflow-y:auto;position:relative;
-  transform:scale(.94) translateY(16px);
-  transition:transform .35s cubic-bezier(.34,1.2,.64,1);
-  scrollbar-width:none;
-  border:1px solid rgba(255,255,255,.06);
-  box-shadow:0 32px 80px rgba(0,0,0,.8);
-}
-.modal-backdrop.open .modal{transform:scale(1) translateY(0);}
-.modal::-webkit-scrollbar{display:none;}
+/* ─── DYNAMIC OVERLAYS / SIDE MODALS ─── */
+.side-panel{position:fixed;top:0;right:0;bottom:0;width:340px;background:var(--surface);border-left:1px solid rgba(255,255,255,.06);z-index:10001;transform:translateX(100%);transition:transform .3s cubic-bezier(.165,.84,.44,1);padding:40px 24px;display:flex;flex-direction:column;}
+.side-panel.open{transform:translateX(0);}
+.side-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:10000;display:none;}
+.side-panel-overlay.open{display:block;}
+.panel-close{position:absolute;top:20px;right:20px;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;}
+.panel-close:hover{color:#fff;}
+.panel-close svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;}
 
-.modal-hero-wrap{position:relative;}
-.modal-backdrop-img{
-  width:100%;aspect-ratio:16/9;object-fit:cover;
-  border-radius:14px 14px 0 0;display:block;
-  background:var(--surface2);
-}
-.modal-hero-grad{
-  position:absolute;bottom:0;left:0;right:0;height:60%;
-  background:linear-gradient(to top,#161616,transparent);
-}
-.modal-close{
-  position:absolute;top:14px;right:14px;
-  width:36px;height:36px;border-radius:50%;
-  background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:#fff;z-index:10;
-  transition:background .2s,transform .2s;
-}
-.modal-close:hover{background:rgba(0,0,0,.95);transform:scale(1.08);}
-.modal-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;}
+.user-badge{display:flex;align-items:center;gap:12px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:24px;}
+.user-avatar{width:44px;height:44px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;}
+.user-email{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;}
+.user-status{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;}
 
-.modal-body{padding:0 32px 32px;}
-.modal-title{
-  font-family:'Josefin Sans',sans-serif;font-size:42px;letter-spacing:1px;
-  margin-bottom:10px;line-height:1;
-}
-.modal-meta{
-  display:flex;align-items:center;gap:10px;
-  font-size:13px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap;
-}
-.modal-rating{color:#fbbf24;font-weight:700;}
-.modal-sep{width:3px;height:3px;border-radius:50%;background:var(--muted2);}
-.modal-overview{font-size:14px;line-height:1.75;color:#bbb;margin-bottom:24px;}
-.modal-actions{display:flex;gap:10px;flex-wrap:wrap;}
-
-/* ─── MY LIST PANEL ─── */
-.mylist-panel{
-  position:fixed;top:0;right:-420px;height:100%;
-  width:380px;background:#111;z-index:2001;
-  transition:right .4s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;padding:24px;
-  box-shadow:-16px 0 60px rgba(0,0,0,.7);
-  scrollbar-width:thin;
-  scrollbar-color:var(--surface3) transparent;
-  border-left:1px solid rgba(255,255,255,.05);
-}
-.mylist-panel.open{right:0;}
-.mylist-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:24px;
-}
-.mylist-header h2{font-family:'Josefin Sans',sans-serif;font-size:26px;letter-spacing:1px;}
-.mylist-close{
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-  color:var(--muted);cursor:pointer;width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:14px;
-  transition:all .2s;
-}
-.mylist-close:hover{background:rgba(255,255,255,.12);color:#fff;}
-.mylist-empty{color:var(--muted);font-size:14px;margin-top:40px;text-align:center;line-height:1.7;}
-.mylist-item{
-  display:flex;align-items:center;gap:12px;
-  padding:10px;border-radius:8px;
-  transition:background .2s;cursor:pointer;
-  margin-bottom:4px;
-}
-.mylist-item:hover{background:var(--surface);}
-.mylist-item img{width:72px;height:44px;border-radius:6px;object-fit:cover;background:var(--surface2);flex-shrink:0;}
-.mylist-item-info{flex:1;min-width:0;}
-.mylist-item-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mylist-item-type{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
-.mylist-item-rm{
-  background:none;border:none;color:var(--muted2);cursor:pointer;
-  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  transition:color .2s,background .2s;flex-shrink:0;
-}
-.mylist-item-rm:hover{color:var(--red);background:rgba(229,9,20,.1);}
-.mylist-item-rm svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;}
-
-/* ─── TOAST ─── */
-.toast{
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);
-  background:rgba(30,30,30,.96);
-  border:1px solid rgba(255,255,255,.1);
-  backdrop-filter:blur(16px);
-  color:#fff;font-size:13px;padding:10px 20px;border-radius:24px;
-  z-index:3000;opacity:0;transition:opacity .3s,transform .3s;
-  pointer-events:none;white-space:nowrap;
-  box-shadow:0 8px 24px rgba(0,0,0,.5);
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ─── TRAILER LIGHTBOX ─── */
-.trailer-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,.92);
-  z-index:3000;display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;
-  transition:opacity .3s;
-  padding:20px;
-  backdrop-filter:blur(8px);
-}
-.trailer-backdrop.open{opacity:1;pointer-events:all;}
-.trailer-box{
-  width:100%;max-width:900px;
-  position:relative;
-  transform:scale(.94) translateY(20px);
-  transition:transform .35s cubic-bezier(.34,1.2,.64,1);
-}
-.trailer-backdrop.open .trailer-box{transform:scale(1) translateY(0);}
-.trailer-ratio{
-  position:relative;padding-top:56.25%;
-  border-radius:12px;overflow:hidden;
-  background:#000;
-  box-shadow:0 32px 80px rgba(0,0,0,.9);
-}
-.trailer-ratio iframe{
-  position:absolute;inset:0;width:100%;height:100%;border:none;
-}
-.trailer-close{
-  position:absolute;top:-48px;right:0;
-  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-  color:#fff;width:38px;height:38px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:background .2s,transform .2s;
-  font-size:0;
-}
-.trailer-close:hover{background:rgba(255,255,255,.2);transform:scale(1.08);}
-.trailer-close svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;}
-.trailer-label{
-  position:absolute;top:-48px;left:0;
-  font-size:12px;font-weight:700;letter-spacing:2px;
-  text-transform:uppercase;color:rgba(255,255,255,.5);
-  display:flex;align-items:center;gap:8px;
-  line-height:38px;
-}
-.trailer-label span{color:var(--red);}
-.trailer-no{
-  padding:48px 32px;text-align:center;
-  color:var(--muted);font-size:14px;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-}
-.trailer-no svg{width:40px;height:40px;stroke:rgba(255,255,255,.15);fill:none;stroke-width:1.5;}
-
-/* btn-trailer style */
-.btn-trailer{
-  background:rgba(229,9,20,.12);color:var(--red);
-  border:1.5px solid rgba(229,9,20,.4);
-  padding:13px 22px;border-radius:6px;
-  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;gap:8px;
-  transition:background .2s,border-color .2s,transform .15s;
-}
-.btn-trailer:hover{background:rgba(229,9,20,.22);border-color:var(--red);transform:scale(1.02);}
-.btn-trailer svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+.panel-menu{display:flex;flex-direction:column;gap:6px;}
+.panel-btn{display:flex;align-items:center;gap:12px;background:none;border:none;color:var(--text);padding:12px 14px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer;text-decoration:none;transition:background .2s;}
+.panel-btn:hover{background:var(--surface2);}
+.panel-btn svg{width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:2;}
+.panel-btn:hover svg{stroke:#fff;}
+.panel-btn.danger{color:var(--red);}
+.panel-btn.danger svg{stroke:var(--red);}
+.panel-btn.danger:hover{background:rgba(229,9,20,.06);}
 
 /* ─── FOOTER ─── */
-footer{
-  border-top:1px solid rgba(255,255,255,.05);
-  padding:28px 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:12px;
-  margin-top:20px;
-}
-footer p{font-size:11px;color:rgba(255,255,255,.22);line-height:1.6;max-width:560px;}
-footer a{font-size:11px;color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s;}
-footer a:hover{color:var(--red);}
+footer{border-top:1px solid rgba(255,255,255,.05);padding:40px;background:#060606;text-align:center;margin-top:40px;}
+footer p{font-size:12px;color:var(--muted);line-height:1.6;max-width:600px;margin:0 auto 12px;}
+footer a{font-size:12px;color:var(--text);text-decoration:none;opacity:.4;transition:opacity .2s;}
+footer a:hover{opacity:1;color:var(--red);}
 
-/* ─── RESPONSIVE ─── */
-@media(max-width:768px){
-  .nav{padding:0 18px;height:56px;}
-  --nav-h:56px;
-  .logo{font-size:16px;}
-  .logo-icon{width:22px;height:22px;}
-  .logo-icon svg{width:12px;height:12px;}
-  .search-wrap.open .search-expand{width:200px;}
-  .hero{padding:0 20px 60px;min-height:520px;}
-  .hero h1{font-size:clamp(40px,12vw,60px);}
-  .hero p{-webkit-line-clamp:2;font-size:14px;}
-  .genre-nav{padding:14px 18px;}
-  .row-header{padding:22px 18px 10px;}
-  .row-posters{padding:8px 18px 20px;}
-  .poster-landscape{width:200px;height:114px;}
-  .poster-portrait{width:120px;height:180px;}
-  .arrow{display:none;}
-  .row-container::before,.row-container::after{width:18px;}
-  #search-results{padding:24px 18px;}
-  .search-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
-  .mylist-panel{width:100%;right:-100%;}
-  .modal{border-radius:10px;max-height:95vh;}
-  .modal-body{padding:0 20px 24px;}
-  .modal-title{font-size:30px;}
-  footer{padding:20px 18px;}
+/* ─── RESPONSIVE GEOMETRY ─── */
+@media (max-width:1200px){
+  .card-portrait{flex:0 0 calc(100% / 5);}
+  .card-landscape{flex:0 0 calc(100% / 3);}
 }
-@media(max-width:480px){
-  .hero{min-height:480px;}
-  .btn-play,.btn-info{padding:11px 18px;font-size:14px;}
-  .hero-badge{font-size:9px;}
+@media (max-width:800px){
+  .nav-inner{padding:0 20px;}
+  .nav-center{display:none;}
+  .hero{height:60vh;padding-bottom:40px;}
+  .hero-inner{padding:0 20px 20px;}
+  .genres-bar{padding:10px 20px;}
+  .main-content{padding:0 20px 60px;gap:28px;}
+  .card-portrait{flex:0 0 calc(100% / 3.5);min-width:120px;}
+  .card-landscape{flex:0 0 calc(100% / 2);min-width:180px;}
+  footer{padding:30px 20px;}
+}
+@media (max-width:480px){
+  .card-portrait{flex:0 0 calc(100% / 2.3);min-width:100px;}
+  .card-landscape{flex:0 0 calc(100% / 1.3);min-width:160px;}
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav" id="nav">
-  <a class="logo" href="index.html">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M19.82 2H4.18A2.18 2.18 0 0 0 2 4.18v15.64A2.18 2.18 0 0 0 4.18 22h15.64A2.18 2.18 0 0 0 22 19.82V4.18A2.18 2.18 0 0 0 19.82 2zM12 17.5L6.5 12 12 6.5l5.5 5.5z"/></svg>
+<div class="toast-container" id="toast-container"></div>
+
+<nav class="nav-wrap" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo-box">
+      <svg width="40" height="40" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="14" stroke="#e50914" stroke-width="2"/>
+        <circle cx="22" cy="22" r="5" fill="#e50914"/>
+        <circle cx="22" cy="10" r="2.5" fill="#e50914"/>
+        <circle cx="22" cy="34" r="2.5" fill="#e50914"/>
+        <circle cx="10" cy="22" r="2.5" fill="#e50914"/>
+        <circle cx="34" cy="22" r="2.5" fill="#e50914"/>
+        <line x1="13.5" y1="13.5" x2="17.5" y2="17.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="30.5" y1="13.5" x2="26.5" y2="17.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13.5" y1="30.5" x2="17.5" y2="26.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="30.5" y1="30.5" x2="26.5" y2="26.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M10 35 Q22 28 34 35" stroke="#e50914" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </a>
+
+    <div class="nav-center">
+      <span class="nav-link active" onclick="switchMainType('all', this)">Home</span>
+      <span class="nav-link" onclick="switchMainType('movie', this)">Movies</span>
+      <span class="nav-link" onclick="switchMainType('tv', this)">TV Series</span>
     </div>
-    CINEMA<span style="color:#fff">NEST</span>
-  </a>
-  <div class="nav-right">
-    <div class="search-wrap" id="search-wrap">
-      <button class="search-icon-btn" id="search-toggle" aria-label="Search">
+
+    <div class="nav-right">
+      <button class="search-trigger" onclick="toggleSearch(true)" aria-label="Search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
-      <input type="text" class="search-expand" id="search" placeholder="Search movies & shows…" autocomplete="off">
-    </div>
-    <button class="nav-cta" id="nav-cta" onclick="window.location.href='signup.html'">Free Trial</button>
-    <div id="nav-trial-badge">
-      <div class="trial-pill-nav" id="trial-pill-nav">
-        <span class="trial-dot"></span>
-        <span id="trial-days-label">Trial</span>
+      <div class="profile-trigger" onclick="toggleProfilePanel(true)">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      <button class="nav-pay-now" id="nav-pay-now-btn" onclick="goToPayment()">Pay Now</button>
     </div>
-    <button class="nav-btn" onclick="openMyList()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      My List
-    </button>
   </div>
 </nav>
 
-<!-- SEARCH RESULTS -->
-<div id="search-results">
-  <h2 id="search-heading">Search Results</h2>
-  <div class="search-grid" id="search-grid"></div>
-</div>
-
-<!-- HERO -->
-<div class="hero" id="hero">
-  <div class="hero-content">
-    <div class="hero-badge">
-      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      Trending Now
-    </div>
-    <h1 id="hero-title">Loading…</h1>
+<header class="hero" id="hero-banner">
+  <div class="hero-inner" id="hero-content">
+    <div class="hero-tag">Featured Spotlight</div>
+    <h1 class="hero-title">Loading Features</h1>
     <div class="hero-meta">
-      <span class="hero-rating">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span id="hero-rating"></span>
-      </span>
-      <span class="hero-dot"></span>
-      <span id="hero-year"></span>
-      <span class="hero-dot"></span>
-      <span id="hero-genre"></span>
+      <span class="hero-rating">★ 0.0</span>
+      <span id="hero-year">0000</span>
     </div>
-    <p id="hero-desc"></p>
-    <div class="hero-actions">
-      <button class="btn-play" id="hero-play">
-        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Play Now
-      </button>
-      <button class="btn-info" id="hero-info">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        More Info
-      </button>
-    </div>
+    <p class="hero-overview"></p>
+    <div class="hero-btns"></div>
+  </div>
+</header>
+
+<div class="genres-bar">
+  <div class="genres-scroll" id="genres-pills-container">
+    <span class="genre-pill active" onclick="filterGenre('all', this)">All Categories</span>
+    <span class="genre-pill" onclick="filterGenre('28', this)">Action</span>
+    <span class="genre-pill" onclick="filterGenre('35', this)">Comedy</span>
+    <span class="genre-pill" onclick="filterGenre('18', this)">Drama</span>
+    <span class="genre-pill" onclick="filterGenre('27', this)">Horror</span>
+    <span class="genre-pill" onclick="filterGenre('10749', this)">Romance</span>
+    <span class="genre-pill" onclick="filterGenre('878', this)">Sci-Fi</span>
   </div>
 </div>
 
-<!-- MEDIA TYPE TOGGLE -->
-<div class="media-toggle" id="media-toggle" style="display:flex;gap:8px;padding:18px 40px 0;">
-  <button class="genre-pill media-toggle-btn active" onclick="filterMediaType('all',this)">All</button>
-  <button class="genre-pill media-toggle-btn" onclick="filterMediaType('movie',this)">Movies</button>
-  <button class="genre-pill media-toggle-btn" onclick="filterMediaType('tv',this)">TV Shows</button>
-</div>
-
-<!-- GENRE NAV -->
-<div class="genre-nav" id="genre-nav">
-  <button class="genre-pill active" onclick="filterGenre(0,this,'')">All</button>
-  <button class="genre-pill" onclick="filterGenre(28,this,'Action')">Action</button>
-  <button class="genre-pill" onclick="filterGenre(35,this,'Comedy')">Comedy</button>
-  <button class="genre-pill" onclick="filterGenre(27,this,'Horror')">Horror</button>
-  <button class="genre-pill" onclick="filterGenre(10749,this,'Romance')">Romance</button>
-  <button class="genre-pill" onclick="filterGenre(878,this,'Sci-Fi')">Sci-Fi</button>
-  <button class="genre-pill" onclick="filterGenre(18,this,'Drama')">Drama</button>
-  <button class="genre-pill" onclick="filterGenre(16,this,'Animation')">Animation</button>
-  <button class="genre-pill" onclick="filterGenre(99,this,'Documentary')">Documentary</button>
-  <button class="genre-pill" onclick="filterGenre(53,this,'Thriller')">Thriller</button>
-</div>
-
-<!-- ROWS -->
-<div class="rows-wrap" id="rows-wrap">
-
-  <div class="row" id="row-watched" style="display:none;">
-    <div class="row-header">
-      <h2><span class="row-emoji">▶</span> Continue Watching</h2>
+<main class="main-content" id="shelves-container">
+  <div class="shelf-row" id="shelf-continue" style="display:none; margin-bottom: 10px;">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Continue Watching</h2>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('watched-list',-1)" aria-label="Scroll left">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="arrow right" onclick="scrollRow('watched-list',1)" aria-label="Scroll right">
-        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-      <div class="row-posters" id="watched-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="continue-list"></div>
     </div>
   </div>
 
-  <div class="row" id="row-trending" data-media="movie">
-    <div class="row-header">
-      <h2><span class="row-emoji">🔥</span> Trending This Week</h2>
-      <button class="see-all" onclick="seeAll('','Trending','movie')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-trending">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Trending Now</h2>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('trending-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('trending-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="trending-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="trending-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="movie">
-    <div class="row-header">
-      <h2><span class="row-emoji">⭐</span> Top Rated</h2>
-      <button class="see-all" onclick="seeAll('','Top Rated','movie')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-top">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Highly Rated</h2>
+      <a class="shelf-seeall" onclick="seeAll('top_rated','Highly Rated','movie')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('top-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('top-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="top-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="top-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="movie">
-    <div class="row-header">
-      <h2><span class="row-emoji">💥</span> Action & Adventure</h2>
-      <button class="see-all" onclick="seeAll('28','Action','movie')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-action">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Action Blockbusters</h2>
+      <a class="shelf-seeall" onclick="seeAll('28','Action Blockbusters','movie')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('action-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('action-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="action-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="action-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="tv">
-    <div class="row-header">
-      <h2><span class="row-emoji">📺</span> Popular TV Shows</h2>
-      <button class="see-all" onclick="seeAll('','Popular TV','tv')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-tv">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Popular TV Series</h2>
+      <a class="shelf-seeall" onclick="seeAll('popular','Popular TV Series','tv')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('tv-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('tv-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="tv-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="tv-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="movie">
-    <div class="row-header">
-      <h2><span class="row-emoji">👻</span> Horror</h2>
-      <button class="see-all" onclick="seeAll('27','Horror','movie')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-horror">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Horror & Thrillers</h2>
+      <a class="shelf-seeall" onclick="seeAll('27','Horror & Thrillers','movie')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('horror-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('horror-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="horror-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="horror-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="movie">
-    <div class="row-header">
-      <h2><span class="row-emoji">😂</span> Comedy</h2>
-      <button class="see-all" onclick="seeAll('35','Comedy','movie')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-comedy">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Comedy Hits</h2>
+      <a class="shelf-seeall" onclick="seeAll('35','Comedy Hits','movie')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('comedy-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('comedy-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="comedy-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="comedy-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="tv">
-    <div class="row-header">
-      <h2><span class="row-emoji">🎌</span> Anime</h2>
-      <button class="see-all" onclick="seeAll('16','Anime','tv')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-anime">
+    <div class="shelf-header">
+      <h2 class="shelf-title">Anime Collections</h2>
+      <a class="shelf-seeall" onclick="seeAll('16','Anime Collections','tv')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('anime-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('anime-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="anime-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="anime-list"></div>
     </div>
   </div>
 
-  <div class="row" data-media="movie">
-    <div class="row-header">
-      <h2><span class="row-emoji">🌍</span> African Stories</h2>
-      <button class="see-all" onclick="seeAll('','African','movie')">See All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="shelf-row" id="row-african">
+    <div class="shelf-header">
+      <h2 class="shelf-title">African Stories</h2>
+      <a class="shelf-seeall" onclick="seeAll('african','African Stories','movie')">See All</a>
     </div>
-    <div class="row-container">
-      <button class="arrow left" onclick="scrollRow('african-list',-1)" aria-label="Scroll left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="arrow right" onclick="scrollRow('african-list',1)" aria-label="Scroll right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="row-posters" id="african-list"></div>
+    <div class="shelf-scroll-wrap">
+      <div class="shelf-track" id="african-list"></div>
     </div>
   </div>
-</div>
+</main>
 
-<!-- DETAIL MODAL -->
-<div class="modal-backdrop" id="modal" onclick="closeModalOnBg(event)">
-  <div class="modal" id="modal-box">
-    <div class="modal-hero-wrap">
-      <img class="modal-backdrop-img" id="modal-img" src="" alt="">
-      <div class="modal-hero-grad"></div>
-      <button class="modal-close" onclick="closeModal()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-title" id="modal-title"></div>
-      <div class="modal-meta" id="modal-meta"></div>
-      <p class="modal-overview" id="modal-overview"></p>
-      <div class="modal-actions">
-        <button class="btn-play" id="modal-play">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Play
-        </button>
-        <button class="btn-trailer" id="modal-trailer-btn">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/><rect x="19" y="3" width="2" height="18" rx="1"/></svg>
-          Trailer
-        </button>
-        <button class="btn-info" id="modal-mylist-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add to My List
-        </button>
-      </div>
+<div class="side-panel-overlay" id="panel-overlay" onclick="toggleProfilePanel(false)"></div>
+<div class="side-panel" id="profile-panel">
+  <button class="panel-close" onclick="toggleProfilePanel(false)">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="user-badge">
+    <div class="user-avatar" id="avatar-letters">G</div>
+    <div style="flex:1; min-width:0;">
+      <div class="user-email" id="panel-email">Guest User</div>
+      <div class="user-status" id="panel-status">Free Mode</div>
     </div>
   </div>
-</div>
-
-<!-- MY LIST PANEL -->
-<div class="mylist-panel" id="mylist-panel">
-  <div class="mylist-header">
-    <h2>My List</h2>
-    <button class="mylist-close" onclick="closeMyList()">✕</button>
-  </div>
-  <div id="mylist-content"></div>
-</div>
-
-<!-- TRAILER LIGHTBOX -->
-<div class="trailer-backdrop" id="trailer-backdrop" onclick="closeTrailerOnBg(event)">
-  <div class="trailer-box">
-    <div class="trailer-label">Now Playing · <span id="trailer-title-label">Trailer</span></div>
-    <button class="trailer-close" onclick="closeTrailer()" aria-label="Close trailer">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  <div class="panel-menu">
+    <a href="pricing.html" class="panel-btn" id="panel-premium-btn">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Upgrade to Premium
+    </a>
+    <button class="panel-btn danger" id="panel-logout-btn" onclick="handleAuthAction()" style="margin-top:20px;">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span id="logout-label">Sign In</span>
     </button>
-    <div class="trailer-ratio" id="trailer-container"></div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="search-modal" id="search-modal">
+  <div class="search-top">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="search-field" placeholder="Search movies, television series..." autocomplete="off">
+    </div>
+    <button class="search-close" onclick="toggleSearch(false)">Cancel</button>
+  </div>
+  <div class="search-results-box">
+    <div class="search-grid" id="search-results-grid"></div>
+  </div>
+</div>
 
-<!-- FOOTER -->
 <footer>
-  <p>This site does not store any files on our server. We only link to media hosted on third-party services.</p>
+  <p>This site does not host files on its server. Content layers link exclusively via modular connection channels to foreign streaming providers.</p>
   <a href="mailto:cinemanest@proton.me">cinemanest@proton.me</a>
 </footer>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, orderBy, query, limit, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
-  authDomain: "cinema-nest-2bf23.firebaseapp.com",
-  projectId: "cinema-nest-2bf23",
-  storageBucket: "cinema-nest-2bf23.firebasestorage.app",
-  messagingSenderId: "912475832817",
-  appId: "1:912475832817:web:7d0de62cac82a04c4e8450"
-};
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
+    authDomain: "cinema-nest-2bf23.firebaseapp.com",
+    projectId: "cinema-nest-2bf23",
+    storageBucket: "cinema-nest-2bf23.firebasestorage.app",
+    messagingSenderId: "912475832817",
+    appId: "1:912475832817:web:7d0de62cac82a04c4e8450"
+  };
 
-// ── Sign out ──
-document.getElementById('nav-signout-btn')?.addEventListener('click', async () => {
-  if (confirm('Sign out?')) {
-    try { await signOut(auth); } catch {}
-    localStorage.removeItem('cinemanest-trial');
-    window.location.href = 'signup.html';
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
+  const API_KEY = '1d3ae144acfb6bfcb25f70361cedcf29';
+  const API = 'https://api.themoviedb.org/3';
+  const IMG = 'https://image.tmdb.org/t/p/w500';
+  const IMG_ORIG = 'https://image.tmdb.org/t/p/original';
+
+  let currentMainType = 'all'; 
+  let currentGenreFilter = 'all';
+
+  // Structural Skeletons Generation
+  function showShimmerSkeletons(targetId, count, landscape = false) {
+    const el = document.getElementById(targetId);
+    if(!el) return;
+    let code = '';
+    for(let i=0; i<count; i++) {
+      code += `<div class="skel-card ${landscape ? 'card-landscape' : 'card-portrait'}"></div>`;
+    }
+    el.innerHTML = code;
   }
-});
 
-// ── Sync subscription from Firestore → localStorage on every login ──
-async function syncSubscriptionFromFirestore(user) {
-  try {
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (snap.exists()) {
-      const data = snap.data();
+  function initAllSkeletons() {
+    showShimmerSkeletons('trending-list', 7, false);
+    showShimmerSkeletons('top-list', 7, false);
+    showShimmerSkeletons('action-list', 4, true);
+    showShimmerSkeletons('tv-list', 7, false);
+    showShimmerSkeletons('horror-list', 4, true);
+    showShimmerSkeletons('comedy-list', 4, true);
+    showShimmerSkeletons('anime-list', 7, false);
+    showShimmerSkeletons('african-list', 4, true);
+  }
+  initAllSkeletons();
 
-      if (data.plan === 'active' && data.subscriptionEnd) {
-        // Paid subscriber — valid and not expired
-        if (new Date(data.subscriptionEnd) > new Date()) {
-          localStorage.setItem('cinemanest-paid', 'true');
-          localStorage.setItem('cinemanest-sub', JSON.stringify({ end: data.subscriptionEnd }));
-        } else {
-          // Subscription exists but has expired — clear paid flags
-          localStorage.removeItem('cinemanest-paid');
-          localStorage.removeItem('cinemanest-sub');
-        }
-      } else {
-        // User is on trial or no plan — clear any stale paid flags so
-        // trial users don't incorrectly show as subscribed
-        localStorage.removeItem('cinemanest-paid');
-        localStorage.removeItem('cinemanest-sub');
+  // Scroll Behavior Navbar Animation
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if(window.scrollY > 40) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
 
-        // Sync trial end date from Firestore into localStorage so it
-        // works across devices / after clearing the browser
-        if (data.trialEnd) {
-          const existing = localStorage.getItem('cinemanest-trial');
-          if (!existing) {
-            localStorage.setItem('cinemanest-trial', JSON.stringify({
-              end: data.trialEnd,
-              start: data.trialStart || new Date().toISOString(),
-            }));
+  // UI Interactive Triggers
+  window.toggleProfilePanel = (open) => {
+    document.getElementById('profile-panel').classList.toggle('open', open);
+    document.getElementById('panel-overlay').classList.toggle('open', open);
+  };
+
+  window.toggleSearch = (open) => {
+    const m = document.getElementById('search-modal');
+    m.classList.toggle('open', open);
+    if(open) {
+      document.getElementById('search-field').focus();
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  };
+
+  // Toast Messaging Core
+  window.showToast = (msg) => {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.classList.add('show'), 50);
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 400);
+    }, 3000);
+  };
+
+  // Auth Status Listeners
+  onAuthStateChanged(auth, async (user) => {
+    const emailEl = document.getElementById('panel-email');
+    const statusEl = document.getElementById('panel-status');
+    const labelEl = document.getElementById('logout-label');
+    const premBtn = document.getElementById('panel-premium-btn');
+    const avatar = document.getElementById('avatar-letters');
+
+    if (user) {
+      emailEl.textContent = user.email;
+      labelEl.textContent = 'Sign Out';
+      avatar.textContent = user.email.slice(0,2).toUpperCase();
+      statusEl.textContent = 'Checking Active Plan...';
+      
+      loadCloudHistory(user);
+
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if(snap.exists()) {
+          const data = snap.data();
+          if(data.plan === 'active' && data.subscriptionEnd && new Date(data.subscriptionEnd) > new Date()) {
+            statusEl.textContent = 'Premium Pass Member';
+            statusEl.style.color = '#4ade80';
+            if(premBtn) premBtn.style.display = 'none';
+            localStorage.setItem('cinemanest-paid', 'true');
+          } else if(data.trialEnd && new Date(data.trialEnd) > new Date()) {
+            statusEl.textContent = 'Trial Period Active';
+            localStorage.removeItem('cinemanest-paid');
+          } else {
+            statusEl.textContent = 'Account Access Paused';
+            localStorage.removeItem('cinemanest-paid');
           }
+        } else {
+          statusEl.textContent = 'Free Account Layer';
+          localStorage.removeItem('cinemanest-paid');
         }
+      } catch {
+        statusEl.textContent = 'Offline Mode Active';
+      }
+    } else {
+      emailEl.textContent = 'Guest Mode';
+      statusEl.textContent = 'Unauthenticated Session';
+      statusEl.style.color = '';
+      labelEl.textContent = 'Sign In / Register';
+      avatar.textContent = '?';
+      if(premBtn) premBtn.style.display = 'flex';
+      localStorage.removeItem('cinemanest-paid');
+      loadLocalHistory();
+    }
+  });
+
+  window.handleAuthAction = async () => {
+    if(auth.currentUser) {
+      await signOut(auth);
+      window.showToast('Session logged out successfully.');
+      toggleProfilePanel(false);
+    } else {
+      window.location.href = 'signup.html';
+    }
+  };
+
+  // Content Engine Fetch Mechanics
+  async function fetchRow(url, containerId, type = 'movie', style = 'portrait') {
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const list = data.results || [];
+      const el = document.getElementById(containerId);
+      if(!el) return;
+
+      if(!list.length) {
+        el.innerHTML = '<p style="padding:10px; color:var(--muted); font-size:13px;">No items matches this filter.</p>';
+        return;
+      }
+
+      el.innerHTML = list.map(item => {
+        const title = item.title || item.name || '';
+        const imgPath = style === 'landscape' ? (item.backdrop_path || item.poster_path) : (item.poster_path || item.backdrop_path);
+        const img = imgPath ? IMG + imgPath : '';
+        const year = (item.release_date || item.first_air_date || '').slice(0,4);
+        const rating = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
+        
+        return `
+          <a class="${style === 'landscape' ? 'card-landscape' : 'card-portrait'}" href="watch.html?id=${item.id}&type=${type}">
+            <img src="${img}" alt="${title}" loading="lazy" onerror="this.src='https://placehold.co/400x600/111/222?text=Cinema+Nest'">
+            <div class="card-meta">
+              <div class="card-title">${title}</div>
+              <div class="card-sub">
+                <span>${year}</span>
+                <span class="card-rating">★ ${rating}</span>
+              </div>
+            </div>
+          </a>`;
+      }).join('');
+    } catch {
+      const el = document.getElementById(containerId);
+      if(el) el.innerHTML = '<p style="padding:10px; color:var(--muted); font-size:13px;">Error fetching layout assets.</p>';
+    }
+  }
+
+  // Spotlight Header Core
+  async function loadTrending() {
+    try {
+      const res = await fetch(`${API}/trending/all/day?api_key=${API_KEY}`);
+      const data = await res.json();
+      const list = data.results || [];
+      
+      // Inject inside trending shelfs
+      const trendEl = document.getElementById('trending-list');
+      if(trendEl && list.length) {
+        trendEl.innerHTML = list.map(item => {
+          const type = item.media_type === 'tv' ? 'tv' : 'movie';
+          const title = item.title || item.name || '';
+          const img = item.poster_path ? IMG + item.poster_path : '';
+          const year = (item.release_date || item.first_air_date || '').slice(0,4);
+          const rating = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
+          return `
+            <a class="card-portrait" href="watch.html?id=${item.id}&type=${type}">
+              <img src="${img}" alt="${title}" loading="lazy">
+              <div class="card-meta">
+                <div class="card-title">${title}</div>
+                <div class="card-sub">
+                  <span>${year}</span>
+                  <span class="card-rating">★ ${rating}</span>
+                </div>
+              </div>
+            </a>`;
+        }).join('');
+      }
+
+      // Feature random item onto high resolution Billboard Banner
+      const valid = list.filter(x => x.backdrop_path && (x.title || x.name));
+      if(!valid.length) return;
+      const featured = valid[Math.floor(Math.random() * Math.min(valid.length, 6))];
+      
+      document.getElementById('hero-banner').style.backgroundImage = `url('${IMG_ORIG + featured.backdrop_path}')`;
+      const content = document.getElementById('hero-content');
+      const t = featured.title || featured.name || '';
+      const type = featured.media_type === 'tv' ? 'tv' : 'movie';
+      const year = (featured.release_date || featured.first_air_date || '').slice(0,4);
+      const rating = featured.vote_average ? featured.vote_average.toFixed(1) : '0.0';
+
+      content.querySelector('.hero-title').textContent = t;
+      content.querySelector('.hero-rating').innerHTML = `★ ${rating}`;
+      document.getElementById('hero-year').textContent = year;
+      content.querySelector('.hero-overview').textContent = featured.overview || '';
+      content.querySelector('.hero-btns').innerHTML = `
+        <a class="btn-play" href="watch.html?id=${featured.id}&type=${type}">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Watch Instantly
+        </a>
+        <a class="btn-info" href="watch.html?id=${featured.id}&type=${type}">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Info Overview
+        </a>`;
+    } catch {}
+  }
+
+  // Continue Watching Modules
+  function renderHistoryShelf(items) {
+    const row = document.getElementById('shelf-continue');
+    const track = document.getElementById('continue-list');
+    if(!items || !items.length) { row.style.display = 'none'; return; }
+    row.style.display = 'block';
+    track.innerHTML = items.map(item => {
+      const title = item.title || '';
+      const img = item.backdrop_path || item.poster ? IMG + (item.backdrop_path || item.poster) : '';
+      return `
+        <a class="card-landscape" href="watch.html?id=${item.mediaId}&type=${item.mediaType}">
+          <img src="${img}" alt="${title}" loading="lazy">
+          <div class="card-meta">
+            <div class="card-title">${title}</div>
+            <div class="card-sub">
+              <span style="color:var(--red); font-weight:700; font-size:10px; letter-spacing:0.5px; text-transform:uppercase;">Resume Stream</span>
+            </div>
+          </div>
+        </a>`;
+    }).join('');
+  }
+
+  function loadLocalHistory() {
+    try {
+      const items = JSON.parse(localStorage.getItem('cinemanest-continue-watching')) || [];
+      renderHistoryShelf(items.slice(0, 5));
+    } catch { renderHistoryShelf([]); }
+  }
+
+  async function loadCloudHistory(user) {
+    try {
+      const q = query(collection(db, 'users', user.uid, 'watchHistory'), orderBy('watchedAt', 'desc'), limit(5));
+      const snap = await getDocs(q);
+      const items = [];
+      snap.forEach(d => items.push(d.data()));
+      if(items.length) renderHistoryShelf(items);
+      else loadLocalHistory();
+    } catch { loadLocalHistory(); }
+  }
+
+  // Structural Navigation Tab Type Sorting Switcher
+  window.switchMainType = (type, btn) => {
+    currentMainType = type;
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    btn.classList.add('active');
+    applyCombinedFilters();
+  };
+
+  // Genre Filters Grid Controller Logic
+  window.filterGenre = (genreId, btn) => {
+    currentGenreFilter = genreId;
+    document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    applyCombinedFilters();
+  };
+
+  function applyCombinedFilters() {
+    initAllSkeletons();
+    
+    // Conditionally display rows according to context parameters
+    const showTv = (currentMainType === 'all' || currentMainType === 'tv');
+    const showMovies = (currentMainType === 'all' || currentMainType === 'movie');
+
+    document.getElementById('row-trending').style.display = (currentGenreFilter === 'all') ? 'block' : 'none';
+    document.getElementById('row-top').style.display = showMovies ? 'block' : 'none';
+    document.getElementById('row-tv').style.display = showTv ? 'block' : 'none';
+    document.getElementById('row-anime').style.display = showTv ? 'block' : 'none';
+    document.getElementById('row-action').style.display = showMovies ? 'block' : 'none';
+    document.getElementById('row-horror').style.display = showMovies ? 'block' : 'none';
+    document.getElementById('row-comedy').style.display = showMovies ? 'block' : 'none';
+    document.getElementById('row-african').style.display = showMovies ? 'block' : 'none';
+
+    if (currentGenreFilter === 'all') {
+      fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`, 'top-list', 'movie', 'portrait');
+      fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28&sort_by=popularity.desc`, 'action-list', 'movie', 'landscape');
+      fetchRow(`${API}/tv/popular?api_key=${API_KEY}`, 'tv-list', 'tv', 'portrait');
+      fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=27&sort_by=popularity.desc`, 'horror-list', 'movie', 'landscape');
+      fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=35&sort_by=popularity.desc`, 'comedy-list', 'movie', 'landscape');
+      fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, 'anime-list', 'tv', 'portrait');
+      fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_origin_country=NG|GH|KE|ZA|EG&sort_by=popularity.desc`, 'african-list', 'movie', 'landscape');
+    } else {
+      // Isolate display to generic target types matched with explicit sub-genres
+      if(showMovies) {
+        fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=${currentGenreFilter}&sort_by=popularity.desc`, 'top-list', 'movie', 'portrait');
+        fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=${currentGenreFilter}&sort_by=vote_count.desc`, 'action-list', 'movie', 'landscape');
+      }
+      if(showTv) {
+        fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=${currentGenreFilter}&sort_by=popularity.desc`, 'tv-list', 'tv', 'portrait');
+        fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=${currentGenreFilter}&sort_by=vote_average.desc`, 'anime-list', 'tv', 'portrait');
       }
     }
-  } catch(e) { console.warn('Subscription sync error:', e); }
-  // Always refresh the UI after sync, regardless of plan state
-  checkTrialStatus();
-}
-
-// ── Continue Watching ──
-const IMG_W = 'https://image.tmdb.org/t/p/w500';
-
-function removeFromContinueWatching(mediaId, mediaType) {
-  try {
-    let list = getLocalWatchHistory();
-    list = list.filter(it => !(String(it.mediaId) === String(mediaId) && it.mediaType === mediaType));
-    localStorage.setItem('cinemanest-continue-watching', JSON.stringify(list));
-  } catch {}
-  renderContinueWatching(getLocalWatchHistory());
-
-  // Best-effort: also remove from Firestore if signed in.
-  const user = auth.currentUser;
-  if (user) {
-    deleteDoc(doc(db, 'users', user.uid, 'watchHistory', String(mediaId))).catch(() => {});
-  }
-}
-
-function renderContinueWatching(items) {
-  const container = document.getElementById('watched-list');
-  const row       = document.getElementById('row-watched');
-  if (!container || !row) return;
-  if (!items || !items.length) {
-    row.style.display = 'none';
-    return;
   }
 
-  container.innerHTML = '';
-  items.forEach(item => {
-    const imgPath = item.backdrop || item.poster;
-    if (!imgPath) return;
-    const style = item.backdrop ? 'landscape' : 'portrait';
+  // Interactive Live Search Modifiers
+  const searchInput = document.getElementById('search-field');
+  let searchDebounceTimeout = null;
 
-    const wrap = document.createElement('div');
-    wrap.className = 'card-wrap';
-
-    const div = document.createElement('div');
-    div.className = style === 'landscape' ? 'poster-landscape' : 'poster-portrait';
-    div.innerHTML = `
-      <img src="${IMG_W + imgPath}" alt="${item.title || ''}" loading="lazy">
-      <div class="card-overlay">
-        <div class="card-title">${item.title || ''}</div>
-      </div>
-      <div class="card-play-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-    `;
-    div.addEventListener('click', () => {
-      window.location.href = `watch.html?id=${item.mediaId}&type=${item.mediaType || 'movie'}`;
-    });
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'card-mylist';
-    removeBtn.setAttribute('aria-label', 'Remove from Continue Watching');
-    removeBtn.innerHTML = '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-    removeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      removeFromContinueWatching(item.mediaId, item.mediaType || 'movie');
-    });
-    div.appendChild(removeBtn);
-
-    const label = document.createElement('div');
-    label.className = 'card-label';
-    label.textContent = item.title || '';
-
-    wrap.appendChild(div);
-    wrap.appendChild(label);
-    container.appendChild(wrap);
-  });
-
-  row.style.display = 'block';
-}
-
-function getLocalWatchHistory() {
-  try {
-    return JSON.parse(localStorage.getItem('cinemanest-continue-watching')) || [];
-  } catch {
-    return [];
-  }
-}
-
-// Show whatever is in localStorage immediately, so Continue Watching
-// appears right away for everyone (signed in or not) without waiting
-// on Firebase Auth / Firestore.
-renderContinueWatching(getLocalWatchHistory());
-
-// Run once immediately using whatever is cached in localStorage, so the
-// correct state (Trial / Expired / Renew / Pay Now) shows right away and
-// doesn't depend on Firebase Auth resolving first (and isn't stuck on the
-// default "Free Trial" button if auth is slow, blocked, or returns no user).
-checkTrialStatus();
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    // Not signed in — still reflect whatever local trial/paid data exists
-    // (e.g. relevant on shared devices) instead of leaving the UI frozen
-    // on the default "Free Trial" button.
-    checkTrialStatus();
-    return;
-  }
-  await syncSubscriptionFromFirestore(user);
-  try {
-    const q = query(
-      collection(db, 'users', user.uid, 'watchHistory'),
-      orderBy('watchedAt', 'desc'),
-      limit(20)
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) return;
-
-    const items = [];
-    snap.forEach(d => items.push(d.data()));
-
-    // Merge in any local-only items (e.g. watched before signing in)
-    // that aren't already present in the Firestore history.
-    const localItems = getLocalWatchHistory();
-    localItems.forEach(li => {
-      const exists = items.some(it => String(it.mediaId) === String(li.mediaId) && it.mediaType === li.mediaType);
-      if (!exists) items.push(li);
-    });
-
-    renderContinueWatching(items.slice(0, 20));
-  } catch (e) {
-    console.warn('Could not load watch history:', e);
-  }
-});
-</script>
-
-<script>
-const API_KEY = "1d3ae144acfb6bfcb25f70361cedcf29";
-const API = "https://api.themoviedb.org/3";
-const IMG = "https://image.tmdb.org/t/p/original";
-const IMG_W = "https://image.tmdb.org/t/p/w500";
-
-let heroMovie = null;
-let myList = JSON.parse(localStorage.getItem('cinemanest-mylist') || '[]');
-let searchTimeout = null;
-let currentModal = null;
-
-/* ── CHECK TRIAL STATUS ON LOAD ── */
-// Note: checkTrialStatus() is called after Firestore sync completes in
-// syncSubscriptionFromFirestore(), so we don't call it here on DOMContentLoaded
-// (which would run before Firebase Auth has restored the session).
-
-/* ── PAYMENT REDIRECT (legacy local-only flag) ── */
-// Note: the authoritative activation path is activate.html, which writes
-// to Firestore with the correct plan length. This is just a local-only
-// fallback, kept plan-aware via an optional ?plan= param (1m/3m/6m/12m).
-(function() {
-  const up = new URLSearchParams(window.location.search);
-  if (up.get('paid') === '1') {
-    const PLAN_DAYS = { '1m': 30, '3m': 90, '6m': 180, '12m': 365 };
-    const plan = PLAN_DAYS[up.get('plan')] ? up.get('plan') : '1m';
-    localStorage.setItem('cinemanest-paid', 'true');
-    const subEnd = new Date(Date.now() + PLAN_DAYS[plan] * 24 * 60 * 60 * 1000);
-    localStorage.setItem('cinemanest-sub', JSON.stringify({ end: subEnd.toISOString() }));
-    history.replaceState({}, '', window.location.pathname);
-  }
-})();
-
-function checkTrialStatus() {
-  const isSignedIn = Object.keys(localStorage).some(k => k.startsWith('firebase:authUser:'));
-
-  // ── Paid subscriber always wins — check this FIRST before trial ──
-  if (localStorage.getItem('cinemanest-paid') === 'true') {
-    showSubscribedPill();
-    return;
-  }
-
-  // ── Free trial (only if not a paid subscriber) ──
-  const saved = localStorage.getItem('cinemanest-trial');
-  if (saved) {
-    try {
-      const trial  = JSON.parse(saved);
-      const msLeft = new Date(trial.end) - new Date();
-
-      if (msLeft > 0) {
-        // Trial still active
-        const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-        document.getElementById('nav-cta').style.display         = 'none';
-        document.getElementById('nav-trial-badge').style.display = 'flex';
-        document.getElementById('trial-days-label').textContent  = `Trial · ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
-        document.getElementById('trial-pill-nav').classList.remove('expired');
-        const activeDot = document.getElementById('trial-pill-nav').querySelector('.trial-dot');
-        if (activeDot) activeDot.classList.remove('expired-dot');
-        const payBtn = document.getElementById('nav-pay-now-btn');
-        payBtn.classList.remove('expired');
-        payBtn.textContent = 'Pay Now';
-        payBtn.classList.add('show');
-        return;
-      }
-
-      // Trial expired and not paid — hide Free Trial button, show Renew
-      document.getElementById('nav-cta').style.display         = 'none';
-      document.getElementById('nav-trial-badge').style.display = 'flex';
-      document.getElementById('trial-days-label').textContent  = '⚠ Trial Expired';
-      // Style pill as urgent (red, glowing) and make it clickable
-      const expiredPill = document.getElementById('trial-pill-nav');
-      expiredPill.classList.add('expired');
-      expiredPill.style.cursor = 'pointer';
-      const expiredDot = expiredPill.querySelector('.trial-dot');
-      if (expiredDot) { expiredDot.classList.add('expired-dot'); }
-      expiredPill.onclick = () => window.location.href = 'pricing.html';
-      // Show Renew button instead of Pay Now, styled urgently
-      const renewBtn = document.getElementById('nav-pay-now-btn');
-      renewBtn.textContent = 'Renew Now';
-      renewBtn.classList.add('show', 'expired');
-      renewBtn.onclick = () => window.location.href = 'pricing.html';
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchDebounceTimeout);
+    const q = e.target.value.trim();
+    if(!q) {
+      document.getElementById('search-results-grid').innerHTML = '';
       return;
-    } catch {}
-  }
+    }
+    searchDebounceTimeout = setTimeout(() => executeLiveQuery(q), 400);
+  });
 
-  // ── Signed in but no trial or payment data ──
-  if (isSignedIn) {
-    document.getElementById('nav-cta').style.display         = 'none';
-    document.getElementById('nav-trial-badge').style.display = 'flex';
-    document.getElementById('trial-days-label').textContent  = 'Upgrade';
-    document.getElementById('nav-pay-now-btn').classList.add('show');
-  }
-}
-
-function showSubscribedPill() {
-  document.getElementById('nav-cta').style.display     = 'none';
-  document.getElementById('nav-pay-now-btn').style.display = 'none';
-
-  const badge = document.getElementById('nav-trial-badge');
-  badge.style.display = 'flex';
-
-  const pill  = document.getElementById('trial-pill-nav');
-  const label = document.getElementById('trial-days-label');
-  const dot   = pill.querySelector('.trial-dot');
-
-  pill.classList.remove('expired');
-  if (dot) dot.classList.remove('expired-dot');
-  document.getElementById('nav-pay-now-btn').classList.remove('expired');
-
-  pill.style.background = 'rgba(34,197,94,.12)';
-  pill.style.border     = '1px solid rgba(34,197,94,.3)';
-  pill.style.color      = '#4ade80';
-  if (dot) { dot.style.background = '#4ade80'; dot.style.animation = 'none'; }
-
-  const subSaved = localStorage.getItem('cinemanest-sub');
-  if (subSaved) {
+  async function executeLiveQuery(queryStr) {
+    const grid = document.getElementById('search-results-grid');
+    grid.innerHTML = '<div class="skel-card card-portrait"></div>'.repeat(6);
     try {
-      const sub    = JSON.parse(subSaved);
-      const msLeft = new Date(sub.end) - new Date();
-      if (msLeft > 0) {
-        const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
-        label.textContent = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
+      const res = await fetch(`${API}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(queryStr)}`);
+      const data = await res.json();
+      const results = (data.results || []).filter(x => x.media_type === 'movie' || x.media_type === 'tv');
+
+      if(!results.length) {
+        grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--muted); font-size:14px; padding-top:40px;">No exact title pairings found.</p>';
         return;
       }
-    } catch {}
-  }
-  label.textContent = 'Active';
-}
 
-function goToPayment() {
-  window.location.href = 'pricing.html';
-}
-
-/* ── NAV ── */
-window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 80);
-});
-
-/* ── SEARCH TOGGLE ── */
-const searchWrap = document.getElementById('search-wrap');
-const searchToggle = document.getElementById('search-toggle');
-const searchInput = document.getElementById('search');
-searchToggle.addEventListener('click', () => {
-  searchWrap.classList.toggle('open');
-  if (searchWrap.classList.contains('open')) {
-    setTimeout(() => searchInput.focus(), 100);
-  } else {
-    searchInput.value = '';
-    document.getElementById('search-results').classList.remove('active');
-    document.body.style.overflow = '';
-  }
-});
-
-searchInput.addEventListener('input', () => {
-  clearTimeout(searchTimeout);
-  const q = searchInput.value.trim();
-  if (!q) {
-    document.getElementById('search-results').classList.remove('active');
-    document.body.style.overflow = '';
-    return;
-  }
-  searchTimeout = setTimeout(async () => {
-    const res = await fetch(`${API}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(q)}&page=1`);
-    const data = await res.json();
-    const results = (data.results || []).filter(r => (r.media_type === 'movie' || r.media_type === 'tv') && r.poster_path);
-    const grid = document.getElementById('search-grid');
-    const heading = document.getElementById('search-heading');
-    heading.textContent = results.length ? `Results for "${q}"` : `No results for "${q}"`;
-    grid.innerHTML = '';
-    results.forEach(item => {
-      const type = item.media_type;
-      const title = item.title || item.name || '';
-      const year = (item.release_date || item.first_air_date || '').slice(0, 4);
-      const wrap = document.createElement('div');
-      wrap.className = 'card-wrap';
-      const div = document.createElement('div');
-      div.className = 'poster-portrait';
-      div.style.width = '100%';
-      div.style.height = 'auto';
-      div.style.aspectRatio = '2/3';
-      div.innerHTML = `
-        <img src="${IMG_W + item.poster_path}" alt="${title}" loading="lazy">
-        <div class="card-overlay">
-          <div class="card-title">${title}</div>
-          <div class="card-year">${year}</div>
-        </div>
-        <div class="card-play-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-      `;
-      const label = document.createElement('div');
-      label.className = 'card-label';
-      label.textContent = title;
-      wrap.appendChild(div);
-      wrap.appendChild(label);
-      wrap.addEventListener('click', () => openModal(item.id, type));
-      grid.appendChild(wrap);
-    });
-    document.getElementById('search-results').classList.add('active');
-    document.body.style.overflow = results.length ? 'hidden' : '';
-  }, 350);
-});
-
-/* ── TRAILER ── */
-function openTrailer(key, title) {
-  document.getElementById('trailer-title-label').innerText = title || 'Trailer';
-  document.getElementById('trailer-container').innerHTML =
-    `<iframe src="https://www.youtube.com/embed/${key}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  document.getElementById('trailer-backdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeTrailer() {
-  document.getElementById('trailer-backdrop').classList.remove('open');
-  document.getElementById('trailer-container').innerHTML = '';
-  document.body.style.overflow = '';
-}
-
-function closeTrailerOnBg(e) {
-  if (e.target === document.getElementById('trailer-backdrop')) closeTrailer();
-}
-
-/* ── HERO ── */
-async function loadHero() {
-  const res = await fetch(`${API}/trending/movie/week?api_key=${API_KEY}`);
-  const data = await res.json();
-  heroMovie = data.results[Math.floor(Math.random() * Math.min(data.results.length, 6))];
-  const h = document.getElementById('hero');
-  h.style.backgroundImage = `url(${IMG + heroMovie.backdrop_path})`;
-  document.getElementById('hero-title').innerText = heroMovie.title;
-  document.getElementById('hero-desc').innerText = heroMovie.overview;
-  document.getElementById('hero-rating').innerText = heroMovie.vote_average.toFixed(1);
-  document.getElementById('hero-year').innerText = heroMovie.release_date?.slice(0,4) || '';
-  document.getElementById('hero-play').onclick = () => goWatch(heroMovie.id, 'movie');
-  document.getElementById('hero-info').onclick = () => openModal(heroMovie.id, 'movie');
-}
-
-/* ── SKELETONS ── */
-function addSkeletons(containerId, count, style) {
-  const c = document.getElementById(containerId);
-  c.innerHTML = '';
-  for (let i = 0; i < count; i++) {
-    const d = document.createElement('div');
-    d.className = 'skeleton';
-    d.style.width = style === 'landscape' ? '260px' : '150px';
-    d.style.height = style === 'landscape' ? '148px' : '225px';
-    d.style.flexShrink = '0';
-    c.appendChild(d);
-  }
-}
-
-/* ── FETCH ROW ── */
-async function fetchRow(url, id, type, style) {
-  addSkeletons(id, 8, style);
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    buildCards(data.results || [], id, type, style);
-  } catch (e) {
-    console.warn('Row failed to load:', id, e);
-    const c = document.getElementById(id);
-    if (c) c.innerHTML = '';
-    const row = document.getElementById(id)?.closest('.row');
-    if (row) row.style.display = 'none';
-  }
-}
-
-function buildCards(items, containerId, type, style) {
-  const c = document.getElementById(containerId);
-  if (!c) return;
-  c.innerHTML = '';
-  items.forEach(item => {
-    const imgPath = style === 'landscape' ? item.backdrop_path : item.poster_path;
-    if (!imgPath) return;
-    const div = document.createElement('div');
-    const wrap = document.createElement('div');
-    wrap.className = 'card-wrap';
-    div.className = style === 'landscape' ? 'poster-landscape' : 'poster-portrait';
-    const title = item.title || item.name || '';
-    const year = (item.release_date || item.first_air_date || '').slice(0, 4);
-    div.innerHTML = `
-      <img src="${IMG_W + imgPath}" alt="${title}" loading="lazy">
-      <div class="card-overlay">
-        <div class="card-title">${title}</div>
-        <div class="card-year">${year}</div>
-      </div>
-      <div class="card-play-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-      <button class="card-mylist" onclick="toggleMyList(event,${JSON.stringify(item)},${JSON.stringify(type)},${JSON.stringify(style)})" aria-label="Add to my list">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-    `;
-    const label = document.createElement('div');
-    label.className = 'card-label';
-    label.textContent = title;
-    wrap.appendChild(div);
-    wrap.appendChild(label);
-    wrap.addEventListener('click', () => openModal(item.id, type));
-    c.appendChild(wrap);
-  });
-}
-
-/* ── SCROLL ── */
-window.scrollRow = (id, dir) => {
-  document.getElementById(id)?.scrollBy({ left: dir * 480, behavior: 'smooth' });
-};
-
-/* ── MODAL ── */
-async function openModal(id, type) {
-  const res = await fetch(`${API}/${type}/${id}?api_key=${API_KEY}&append_to_response=videos,credits`);
-  const m = await res.json();
-  currentModal = { id, type, item: m };
-  document.getElementById('modal-img').src = m.backdrop_path ? IMG + m.backdrop_path : '';
-  document.getElementById('modal-title').innerText = m.title || m.name || '';
-  const runtime = m.runtime ? `${Math.floor(m.runtime/60)}h ${m.runtime%60}m` : (m.number_of_seasons ? `${m.number_of_seasons} Season${m.number_of_seasons>1?'s':''}` : '');
-  const year = (m.release_date || m.first_air_date || '').slice(0,4);
-  const rating = m.vote_average ? m.vote_average.toFixed(1) : '';
-  const genres = (m.genres||[]).slice(0,3).map(g=>g.name).join(' · ');
-  document.getElementById('modal-meta').innerHTML = `
-    ${rating ? `<span class="modal-rating">★ ${rating}</span><span class="modal-sep"></span>` : ''}
-    ${year ? `<span>${year}</span>` : ''}
-    ${runtime ? `<span class="modal-sep"></span><span>${runtime}</span>` : ''}
-    ${genres ? `<span class="modal-sep"></span><span>${genres}</span>` : ''}
-  `;
-  document.getElementById('modal-overview').innerText = m.overview || '';
-  document.getElementById('modal-play').onclick = () => goWatch(id, type);
-
-  // Trailer button
-  const trailer = (m.videos?.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube')
-    || (m.videos?.results || []).find(v => v.site === 'YouTube');
-  const trailerBtn = document.getElementById('modal-trailer-btn');
-  if (trailer) {
-    trailerBtn.style.display = 'flex';
-    trailerBtn.onclick = () => openTrailer(trailer.key, m.title || m.name);
-  } else {
-    trailerBtn.style.display = 'none';
+      grid.innerHTML = results.map(item => {
+        const type = item.media_type;
+        const title = item.title || item.name || '';
+        const img = item.poster_path ? IMG + item.poster_path : '';
+        const year = (item.release_date || item.first_air_date || '').slice(0,4);
+        return `
+          <a class="card-portrait" href="watch.html?id=${item.id}&type=${type}">
+            <img src="${img}" alt="${title}" onerror="this.src='https://placehold.co/400x600/111/222?text=Cinema+Nest'">
+            <div class="card-meta">
+              <div class="card-title">${title}</div>
+              <div class="card-sub"><span>${year}</span><span>${type.toUpperCase()}</span></div>
+            </div>
+          </a>`;
+      }).join('');
+    } catch {
+      grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--muted);">Service layer validation timed out.</p>';
+    }
   }
 
-  const inList = myList.some(x => x.id === id);
-  const listBtn = document.getElementById('modal-mylist-btn');
-  listBtn.textContent = inList ? '✓ In My List' : '+ Add to My List';
-  listBtn.style.background = inList ? 'rgba(229,9,20,.2)' : 'rgba(255,255,255,.12)';
-  listBtn.style.color = inList ? 'var(--red)' : '#fff';
-  listBtn.onclick = () => toggleMyList(null, m, type, 'portrait');
+  window.seeAll = (genre, title, type) => {
+    window.location.href = `browse.html?genre=${genre}&title=${title}&type=${type}`;
+  };
 
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeModalOnBg(e) {
-  if (e.target === document.getElementById('modal')) closeModal();
-}
-
-/* ── MY LIST ── */
-function toggleMyList(e, item, type, style) {
-  if (e) e.stopPropagation();
-  const id = item.id;
-  const existing = myList.findIndex(x => x.id === id);
-  if (existing >= 0) {
-    myList.splice(existing, 1);
-  } else {
-    myList.push({...item, type, style});
-  }
-  localStorage.setItem('cinemanest-mylist', JSON.stringify(myList));
-  refreshMyListUI();
-  showToast(existing >= 0 ? 'Removed from My List' : 'Added to My List');
-}
-
-function openMyList() {
-  refreshMyListUI();
-  document.getElementById('mylist-panel').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeMyList() {
-  document.getElementById('mylist-panel').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function refreshMyListUI() {
-  const content = document.getElementById('mylist-content');
-  if (myList.length === 0) {
-    content.innerHTML = '<div class="mylist-empty">Your list is empty.<br>Add movies & shows to watch later!</div>';
-    return;
-  }
-  content.innerHTML = myList.map(item => {
-    const img = item.poster_path ? IMG_W + item.poster_path : '';
-    const title = item.title || item.name || 'Unknown';
-    const type = item.type === 'movie' ? 'Movie' : 'Show';
-    return `
-      <div class="mylist-item" onclick="openModal(${item.id},'${item.type}');closeMyList();">
-        ${img ? `<img src="${img}" alt="">` : '<div style="width:72px;height:44px;background:var(--surface2);border-radius:6px;flex-shrink:0;"></div>'}
-        <div class="mylist-item-info">
-          <div class="mylist-item-title">${title}</div>
-          <div class="mylist-item-type">${type}</div>
-        </div>
-        <button class="mylist-item-rm" onclick="toggleMyList(event,${JSON.stringify(item)},'${item.type}','${item.style}')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-    `;
-  }).join('');
-}
-
-/* ── FILTER GENRE ── */
-let activeGenreId = 0;
-let activeMediaFilter = 'all';
-
-function applyRowFilters() {
-  document.querySelectorAll('.row[data-media]').forEach(row => {
-    const media = row.dataset.media;
-    const isTrendingRow = row.id === 'row-trending';
-    let visible = true;
-    if (activeMediaFilter !== 'all' && media !== activeMediaFilter) visible = false;
-    // While a genre filter is active, only the (now re-purposed) Trending
-    // row shows results for that genre — the other curated shelves are
-    // hidden so the page doesn't show duplicate/conflicting content.
-    if (activeGenreId !== 0 && !isTrendingRow) visible = false;
-    row.style.display = visible ? '' : 'none';
-  });
-}
-
-function filterGenre(genreId, el, genreName) {
-  document.querySelectorAll('.genre-nav .genre-pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  activeGenreId = genreId;
-
-  const headerEl = document.querySelector('#row-trending .row-header h2');
-  const seeAllBtn = document.querySelector('#row-trending .see-all');
-
-  if (genreId === 0) {
-    if (headerEl) headerEl.innerHTML = '<span class="row-emoji">🔥</span> Trending This Week';
-    if (seeAllBtn) seeAllBtn.setAttribute('onclick', "seeAll('','Trending','movie')");
-    loadTrending();
-  } else {
-    if (headerEl) headerEl.innerHTML = `<span class="row-emoji">🎯</span> ${genreName}`;
-    if (seeAllBtn) seeAllBtn.setAttribute('onclick', `seeAll('${genreId}','${genreName}','movie')`);
-    fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc`, 'trending-list', 'movie', 'landscape');
-  }
-  applyRowFilters();
-}
-
-function filterMediaType(type, el) {
-  document.querySelectorAll('.media-toggle-btn').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  activeMediaFilter = type;
-  applyRowFilters();
-}
-
-/* ── WATCH HANDLERS ── */
-function goWatch(id, type) {
-  if (localStorage.getItem('cinemanest-paid') === 'true') {
-    window.location.href = `watch.html?id=${id}&type=${type}`;
-    return;
-  }
-
-  const saved      = localStorage.getItem('cinemanest-trial');
-  const isSignedIn = Object.keys(localStorage).some(k => k.startsWith('firebase:authUser:'));
-
-  if (saved) {
-    try {
-      const trial  = JSON.parse(saved);
-      const msLeft = new Date(trial.end) - new Date();
-      if (msLeft > 0) {
-        window.location.href = `watch.html?id=${id}&type=${type}`;
-        return;
-      }
-    } catch {}
-    goToPayment();
-    return;
-  }
-
-  if (isSignedIn) {
-    window.location.href = `watch.html?id=${id}&type=${type}`;
-    return;
-  }
-
-  goToPayment();
-}
-
-/* ── TRENDING ── */
-function loadTrending() {
-  return fetchRow(`${API}/trending/movie/week?api_key=${API_KEY}`, 'trending-list', 'movie', 'landscape');
-}
-
-/* ── INIT ── */
-Promise.all([
-  loadHero().catch(e => console.warn('Hero failed to load:', e)),
-  loadTrending(),
-  fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`, 'top-list', 'movie', 'portrait'),
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28&sort_by=popularity.desc`, 'action-list', 'movie', 'landscape'),
-  fetchRow(`${API}/tv/popular?api_key=${API_KEY}`, 'tv-list', 'tv', 'portrait'),
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=27&sort_by=popularity.desc`, 'horror-list', 'movie', 'landscape'),
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=35&sort_by=popularity.desc`, 'comedy-list', 'movie', 'landscape'),
-  fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, 'anime-list', 'tv', 'portrait'),
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_origin_country=NG|GH|KE|ZA|EG&sort_by=popularity.desc`, 'african-list', 'movie', 'landscape'),
-]);
-
-/* ── SEE ALL PAGES ── */
-window.seeAll = (genre, title, type) => {
-  window.location.href = `browse.html?genre=${genre}&title=${title}&type=${type}`;
-};
-
-/* ── TOAST ── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-/* ── SIGN OUT handled in module script above ── */
+  // Async Execution Initialization
+  Promise.all([
+    loadTrending(),
+    fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`, 'top-list', 'movie', 'portrait'),
+    fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28&sort_by=popularity.desc`, 'action-list', 'movie', 'landscape'),
+    fetchRow(`${API}/tv/popular?api_key=${API_KEY}`, 'tv-list', 'tv', 'portrait'),
+    fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=27&sort_by=popularity.desc`, 'horror-list', 'movie', 'landscape'),
+    fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=35&sort_by=popularity.desc`, 'comedy-list', 'movie', 'landscape'),
+    fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, 'anime-list', 'tv', 'portrait'),
+    fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_origin_country=NG|GH|KE|ZA|EG&sort_by=popularity.desc`, 'african-list', 'movie', 'landscape'),
+  ]);
 </script>
-
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
   });
 }
 </script>
